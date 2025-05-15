@@ -29,6 +29,7 @@
         <input type="number" id="distance" required><br><br>
 
         <button id="add-trip">Add Trip</button>
+        <button id="edit-trip" style="display:none; margin-left:10px;">Update Trip</button>
     </div>
 
     <h2>Trip Log</h2>
@@ -44,6 +45,21 @@
     </div>
 
     <button id="export-data">Export Data</button>
+
+    <div id="edit-modal" class="modal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
+        <div
+            style="background:#fff; padding:24px; border-radius:8px; min-width:300px; max-width:90vw; position:relative;">
+            <h3>Edit Trip</h3>
+            <label>Date: <input type="date" id="edit-date"></label><br><br>
+            <label>Start Location: <input type="text" id="edit-start-location"></label><br><br>
+            <label>End Location: <input type="text" id="edit-end-location"></label><br><br>
+            <label>Purpose: <input type="text" id="edit-purpose"></label><br><br>
+            <label>Distance (miles): <input type="number" id="edit-distance"></label><br><br>
+            <button id="save-edit">Save</button>
+            <button id="cancel-edit" style="margin-left:10px;">Cancel</button>
+        </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>

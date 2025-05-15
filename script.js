@@ -11,6 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportFilterRadios = document.getElementsByName('export-filter');
 
     let trips = loadTrips();
+    let editTripIndex = null;
+    const editModal = document.getElementById('edit-modal');
+    const editDateInput = document.getElementById('edit-date');
+    const editStartLocationInput = document.getElementById('edit-start-location');
+    const editEndLocationInput = document.getElementById('edit-end-location');
+    const editPurposeInput = document.getElementById('edit-purpose');
+    const editDistanceInput = document.getElementById('edit-distance');
+    const saveEditButton = document.getElementById('save-edit');
+    const cancelEditButton = document.getElementById('cancel-edit');
+
     renderTrips();
 
     addTripButton.addEventListener('click', addTrip);
@@ -19,6 +29,27 @@ document.addEventListener('DOMContentLoaded', () => {
     exportFilterRadios.forEach(radio => {
         radio.addEventListener('change', updateFilterInputs);
     });
+
+    saveEditButton.addEventListener('click', () => {
+        if (editTripIndex === null) return;
+        const updatedTrip = {
+            date: editDateInput.value,
+            startLocation: editStartLocationInput.value.trim(),
+            endLocation: editEndLocationInput.value.trim(),
+            purpose: editPurposeInput.value.trim(),
+            distance: parseFloat(editDistanceInput.value)
+        };
+        if (!updatedTrip.date || isNaN(updatedTrip.distance)) {
+            alert('Please enter a valid date and distance.');
+            return;
+        }
+        trips[editTripIndex] = updatedTrip;
+        saveTrips();
+        renderTrips();
+        closeEditModal();
+    });
+
+    cancelEditButton.addEventListener('click', closeEditModal);
 
     function addTrip() {
         const date = dateInput.value;
@@ -61,6 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (trip.endLocation) listItem.textContent += ` (To: ${trip.endLocation})`;
             if (trip.purpose) listItem.textContent += ` - Purpose: ${trip.purpose}`;
 
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Edit';
+            editButton.style.marginLeft = '10px';
+            editButton.addEventListener('click', () => openEditModal(index));
+            listItem.appendChild(editButton);
+
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.style.marginLeft = '10px';
@@ -69,6 +106,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tripList.appendChild(listItem);
         });
+    }
+
+    function openEditModal(index) {
+        editTripIndex = index;
+        const trip = trips[index];
+        editDateInput.value = trip.date;
+        editStartLocationInput.value = trip.startLocation;
+        editEndLocationInput.value = trip.endLocation;
+        editPurposeInput.value = trip.purpose;
+        editDistanceInput.value = trip.distance;
+        editModal.style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        editModal.style.display = 'none';
+        editTripIndex = null;
     }
 
     function deleteTrip(index) {
