@@ -301,6 +301,61 @@ h2 {
     background: #21618c;
 }
 
+#login-container {
+    background: #fff;
+    max-width: 500px;
+    width: 95vw;
+    margin: 40px auto 24px auto;
+    padding: 24px 4vw 18px 4vw;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(41, 128, 185, 0.13);
+    display: none;
+}
+
+#login-container h2 {
+    text-align: center;
+    color: #2980b9;
+    margin-bottom: 18px;
+    font-size: 1.5em;
+}
+
+#login-form input[type="text"],
+#login-form input[type="password"] {
+    width: 100%;
+    padding: 7px 10px;
+    margin-bottom: 14px;
+    border: 1px solid #b2bec3;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #f4f8fb;
+    box-sizing: border-box;
+}
+
+#login-form button[type="submit"] {
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 18px;
+    font-size: 1em;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+#login-form button[type="submit"]:hover {
+    background: #21618c;
+}
+
+#login-error {
+    color: #c0392b;
+    text-align: center;
+    margin-top: 10px;
+    display: none;
+}
+
 @media (max-width: 600px) {
     .inline-edit-fields {
         flex-direction: column;
@@ -334,5 +389,10 @@ h2 {
 
     #trip-list .trip-actions {
         margin-top: 0;
+    }
+
+    #login-container {
+        width: 500px;
+        max-width: 500px;
     }
 }

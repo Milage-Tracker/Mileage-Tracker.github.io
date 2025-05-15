@@ -10,6 +10,212 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterInputs = document.getElementById('filter-inputs');
     const exportFilterRadios = document.getElementsByName('export-filter');
 
+    // --- FIREBASE AUTH LOGIC START ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyClCS--vMtgqiAJ5I4DOoo_7ZofzgygF3w",
+        authDomain: "milage-tracker-aeb71.firebaseapp.com",
+        projectId: "milage-tracker-aeb71",
+        storageBucket: "milage-tracker-aeb71.firebasestorage.app",
+        messagingSenderId: "1033990559453",
+        appId: "1:1033990559453:web:71f88d296c878800012d34"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Redirect to login if not logged in
+    if (!auth.currentUser) {
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+    }
+
+    function isLoggedIn() {
+        return !!auth.currentUser;
+    }
+    function showLogin() {
+        loginContainer.style.display = 'block';
+        appContainer.style.display = 'none';
+    }
+    function showApp() {
+        loginContainer.style.display = 'none';
+        appContainer.style.display = '';
+    }
+    // Listen for auth state changes
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            showApp();
+        } else {
+            showLogin();
+        }
+    });
+    loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        // Firebase uses email for login, so you may want to require email or append a domain
+        auth.signInWithEmailAndPassword(username, password)
+            .then(() => {
+                loginError.style.display = 'none';
+            })
+            .catch(error => {
+                loginError.textContent = error.message;
+                loginError.style.display = 'block';
+            });
+    });
+
+    const signupForm = document.getElementById('signup-form');
+    const resetForm = document.getElementById('reset-form');
+    const showSignupBtn = document.getElementById('show-signup');
+    const showResetBtn = document.getElementById('show-reset');
+    const cancelSignupBtn = document.getElementById('cancel-signup');
+    const cancelResetBtn = document.getElementById('cancel-reset');
+    const loginSuccess = document.getElementById('login-success');
+
+    // Toggle forms
+    showSignupBtn.addEventListener('click', () => {
+        loginForm.style.display = 'none';
+        signupForm.style.display = '';
+        resetForm.style.display = 'none';
+        loginError.style.display = 'none';
+        loginSuccess.style.display = 'none';
+    });
+    showResetBtn.addEventListener('click', () => {
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'none';
+        resetForm.style.display = '';
+        loginError.style.display = 'none';
+        loginSuccess.style.display = 'none';
+    });
+    cancelSignupBtn.addEventListener('click', () => {
+        loginForm.style.display = '';
+        signupForm.style.display = 'none';
+        resetForm.style.display = 'none';
+        loginError.style.display = 'none';
+        loginSuccess.style.display = 'none';
+    });
+    cancelResetBtn.addEventListener('click', () => {
+        loginForm.style.display = '';
+        signupForm.style.display = 'none';
+        resetForm.style.display = 'none';
+        loginError.style.display = 'none';
+        loginSuccess.style.display = 'none';
+    });
+
+    // Signup
+    signupForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value;
+        auth.createUserWithEmailAndPassword(email, password)
+            .then(() => {
+                loginSuccess.textContent = 'Signup successful! You can now log in.';
+                loginSuccess.style.display = 'block';
+                loginError.style.display = 'none';
+                signupForm.reset();
+                setTimeout(() => {
+                    loginForm.style.display = '';
+                    signupForm.style.display = 'none';
+                    loginSuccess.style.display = 'none';
+                }, 1500);
+            })
+            .catch(error => {
+                loginError.textContent = error.message;
+                loginError.style.display = 'block';
+                loginSuccess.style.display = 'none';
+            });
+    });
+
+    // Reset password
+    resetForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const email = document.getElementById('reset-email').value.trim();
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+                loginSuccess.textContent = 'Password reset email sent!';
+                loginSuccess.style.display = 'block';
+                loginError.style.display = 'none';
+                resetForm.reset();
+            })
+            .catch(error => {
+                loginError.textContent = error.message;
+                loginError.style.display = 'block';
+                loginSuccess.style.display = 'none';
+            });
+    });
+
+    // Profile/Logout logic
+    const logoutBtn = document.getElementById('logout-btn');
+    const profileBtn = document.getElementById('profile-btn');
+    const profileModal = document.getElementById('profile-modal');
+    const profileClose = document.getElementById('profile-close');
+    const profileSave = document.getElementById('profile-save');
+    const profileEmail = document.getElementById('profile-email');
+    const profileModalEmail = document.getElementById('profile-modal-email');
+    const profilePassword = document.getElementById('profile-password');
+    const profileMessage = document.getElementById('profile-message');
+
+    function updateProfileUI() {
+        if (auth.currentUser) {
+            profileEmail.textContent = auth.currentUser.email;
+            profileModalEmail.textContent = auth.currentUser.email;
+        }
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                location.reload();
+            });
+        });
+    }
+    if (profileBtn) {
+        profileBtn.addEventListener('click', () => {
+            updateProfileUI();
+            profileModal.style.display = 'flex';
+            profilePassword.value = '';
+            profileMessage.textContent = '';
+        });
+    }
+    if (profileClose) {
+        profileClose.addEventListener('click', () => {
+            profileModal.style.display = 'none';
+        });
+    }
+    if (profileSave) {
+        profileSave.addEventListener('click', () => {
+            const newPassword = profilePassword.value;
+            profileMessage.textContent = '';
+            if (!newPassword || newPassword.length < 6) {
+                profileMessage.textContent = 'Password must be at least 6 characters.';
+                profileMessage.style.color = '#c0392b';
+                return;
+            }
+            auth.currentUser.updatePassword(newPassword)
+                .then(() => {
+                    profileMessage.textContent = 'Password updated!';
+                    profileMessage.style.color = '#27ae60';
+                    profilePassword.value = '';
+                })
+                .catch(error => {
+                    profileMessage.textContent = error.message;
+                    profileMessage.style.color = '#c0392b';
+                });
+        });
+    }
+    // Hide modal on outside click
+    if (profileModal) {
+        profileModal.addEventListener('click', (e) => {
+            if (e.target === profileModal) profileModal.style.display = 'none';
+        });
+    }
+    // Update profile UI on login
+    auth.onAuthStateChanged(user => {
+        if (user) updateProfileUI();
+    });
+    // --- FIREBASE AUTH LOGIC END ---
+
     let trips = loadTrips();
     let editTripIndex = null;
     let currentEditIndex = null;

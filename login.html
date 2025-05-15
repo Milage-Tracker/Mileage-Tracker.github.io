@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Mileage Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/11.7.3/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/11.7.3/firebase-auth-compat.js"></script>
+</head>
+
+<body>
+    <div id="login-container" class="login-card">
+        <h2 style="text-align:center;">Login</h2>
+        <form id="login-form">
+            <div style="margin-bottom:12px;">
+                <input type="text" id="login-username" placeholder="Email" required style="width:100%;padding:8px;">
+            </div>
+            <div style="margin-bottom:16px;">
+                <input type="password" id="login-password" placeholder="Password" required
+                    style="width:100%;padding:8px;">
+            </div>
+            <button type="submit" style="width:100%;">Login</button>
+        </form>
+        <div style="text-align:center;margin:10px 0;">
+            <button id="show-signup" style="background:none;border:none;color:#2980b9;cursor:pointer;">Sign up</button>
+            |
+            <button id="show-reset" style="background:none;border:none;color:#2980b9;cursor:pointer;">Forgot
+                Password?</button>
+        </div>
+        <form id="signup-form" style="display:none;">
+            <div style="margin-bottom:12px;">
+                <input type="text" id="signup-email" placeholder="Email" required style="width:100%;padding:8px;">
+            </div>
+            <div style="margin-bottom:16px;">
+                <input type="password" id="signup-password" placeholder="Password" required
+                    style="width:100%;padding:8px;">
+            </div>
+            <button type="submit" style="width:100%;">Sign Up</button>
+            <button type="button" id="cancel-signup" style="width:100%;margin-top:8px;">Cancel</button>
+        </form>
+        <form id="reset-form" style="display:none;">
+            <div style="margin-bottom:12px;">
+                <input type="text" id="reset-email" placeholder="Email" required style="width:100%;padding:8px;">
+            </div>
+            <button type="submit" style="width:100%;">Send Reset Email</button>
+            <button type="button" id="cancel-reset" style="width:100%;margin-top:8px;">Cancel</button>
+        </form>
+        <div id="login-error" style="color:#c0392b;text-align:center;margin-top:10px;display:none;"></div>
+        <div id="login-success" style="color:#27ae60;text-align:center;margin-top:10px;display:none;"></div>
+    </div>
+    <script src="login.js"></script>
+</body>
+
+</html>
