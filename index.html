@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mileage Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Mileage Tracker</h1>
+
+    <div class="input-form">
+        <label for="date">Date (YYYY-MM-DD):</label>
+        <input type="date" id="date" required><br><br>
+
+        <label for="start-location">Start Location:</label>
+        <input type="text" id="start-location"><br><br>
+
+        <label for="end-location">End Location:</label>
+        <input type="text" id="end-location"><br><br>
+
+        <label for="purpose">Trip Purpose:</label>
+        <input type="text" id="purpose"><br><br>
+
+        <label for="distance">Distance (miles):</label>
+        <input type="number" id="distance" required><br><br>
+
+        <button id="add-trip">Add Trip</button>
+    </div>
+
+    <h2>Trip Log</h2>
+    <ul id="trip-list">
+    </ul>
+
+    <div class="export-filters" style="margin-bottom: 16px;">
+        <label><input type="radio" name="export-filter" value="all" checked> All</label>
+        <label><input type="radio" name="export-filter" value="range"> Date Range</label>
+        <label><input type="radio" name="export-filter" value="month"> Month</label>
+        <label><input type="radio" name="export-filter" value="year"> Year</label>
+        <span id="filter-inputs" style="margin-left: 10px;"></span>
+    </div>
+
+    <button id="export-data">Export Data</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

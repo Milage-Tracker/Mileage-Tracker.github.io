@@ -1,0 +1,47 @@
+body {
+    font-family: sans-serif;
+    margin: 20px;
+}
+
+.input-form label {
+    display: inline-block;
+    width: 150px;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+.input-form input[type="text"],
+.input-form input[type="date"],
+.input-form input[type="number"] {
+    width: 200px;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.input-form button,
+#export-data {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#trip-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    border: 1px solid #eee;
+}
+
+#trip-list li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+#trip-list li:last-child {
+    border-bottom: none;
+}
