@@ -1,47 +1,338 @@
+/* General page styles */
+html {
+    box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
 body {
-    font-family: sans-serif;
-    margin: 20px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f7f9fa;
+    margin: 0;
+    padding: 0;
+    color: #222;
+}
+
+h1 {
+    text-align: center;
+    color: #2980b9;
+    margin-top: 24px;
+    margin-bottom: 8px;
+    font-size: 2rem;
+}
+
+.input-form {
+    background: #fff;
+    width: 95vw;
+    max-width: 500px;
+    margin: 16px auto 12px auto;
+    padding: 18px 4vw 10px 4vw;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(41, 128, 185, 0.08);
 }
 
 .input-form label {
-    display: inline-block;
-    width: 150px;
-    text-align: left;
-    margin-bottom: 5px;
+    display: block;
+    margin-bottom: 4px;
+    color: #2980b9;
+    font-weight: 500;
+    font-size: 1em;
 }
 
 .input-form input[type="text"],
 .input-form input[type="date"],
 .input-form input[type="number"] {
-    width: 200px;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
+    width: 100%;
+    padding: 7px 10px;
+    margin-bottom: 14px;
+    border: 1px solid #b2bec3;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #f4f8fb;
     box-sizing: border-box;
 }
 
-.input-form button,
+.input-form button {
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 18px;
+    font-size: 1em;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.input-form button+button {
+    margin-left: 0;
+}
+
+.input-form button:hover {
+    background: #21618c;
+}
+
+.export-filters {
+    background: #fff;
+    width: 95vw;
+    max-width: 500px;
+    margin: 0 auto 12px auto;
+    padding: 10px 4vw 8px 4vw;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(41, 128, 185, 0.06);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 1em;
+}
+
+.export-filters label {
+    color: #2980b9;
+    font-weight: 500;
+    margin-right: 8px;
+    font-size: 1em;
+}
+
 #export-data {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
+    display: block;
+    width: 95vw;
+    max-width: 500px;
+    margin: 0 auto 24px auto;
+    background: #27ae60;
+    border-radius: 4px;
+    padding: 10px 0;
+    font-size: 1.1em;
+    color: #fff;
     border: none;
     cursor: pointer;
-    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+#export-data:hover {
+    background: #219150;
+}
+
+h2 {
+    text-align: center;
+    color: #2980b9;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    font-size: 1.3rem;
 }
 
 #trip-list {
-    list-style-type: none;
+    width: 95vw;
+    max-width: 500px;
+    margin: 0 auto 24px auto;
     padding: 0;
-    margin-top: 20px;
-    border: 1px solid #eee;
+    list-style: none;
 }
 
 #trip-list li {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
+    background: #fff;
+    margin-bottom: 10px;
+    padding: 12px 4vw;
+    border-radius: 6px;
+    box-shadow: 0 1px 6px rgba(41, 128, 185, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 1.05em;
+    word-break: break-word;
 }
 
-#trip-list li:last-child {
-    border-bottom: none;
+#trip-list .trip-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+#trip-list button {
+    background: #e67e22;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 14px;
+    font-size: 0.98em;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: auto;
+}
+
+#trip-list button:hover {
+    background: #ba6518;
+}
+
+/* Modal styles */
+#edit-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+#edit-modal .modal-content {
+    background: #fff;
+    padding: 16px 18px 8px 18px;
+    border-radius: 10px;
+    min-width: 0;
+    width: 95vw;
+    max-width: 340px;
+    max-height: 90vh;
+    position: relative;
+    box-shadow: 0 2px 16px rgba(41, 128, 185, 0.13);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#edit-modal h3 {
+    color: #2980b9;
+    margin-top: 0;
+    font-size: 1.2em;
+    margin-bottom: 8px;
+}
+
+#edit-modal label {
+    display: block;
+    margin-bottom: 2px;
+    color: #2980b9;
+    font-weight: 500;
+    font-size: 1em;
+}
+
+#edit-modal input[type="text"],
+#edit-modal input[type="date"],
+#edit-modal input[type="number"] {
+    width: 100%;
+    padding: 7px 10px;
+    margin-bottom: 8px;
+    border: 1px solid #b2bec3;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #f4f8fb;
+    box-sizing: border-box;
+}
+
+#edit-modal button {
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 18px;
+    font-size: 1em;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+#edit-modal button+button {
+    margin-left: 0;
+}
+
+#edit-modal button:hover {
+    background: #21618c;
+}
+
+.inline-edit-form {
+    background: #f4f8fb;
+    border: 1px solid #b2bec3;
+    border-radius: 8px;
+    margin: 10px 0 18px 0;
+    padding: 16px 12px 10px 12px;
+    box-shadow: 0 1px 6px rgba(41, 128, 185, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 500px;
+}
+
+.inline-edit-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.inline-edit-fields input {
+    flex: 1 1 120px;
+    min-width: 100px;
+    padding: 6px 8px;
+    border: 1px solid #b2bec3;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #fff;
+}
+
+.inline-edit-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.inline-edit-actions button {
+    background: #2980b9;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 7px 18px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.inline-edit-actions button:hover {
+    background: #21618c;
+}
+
+@media (max-width: 600px) {
+    .inline-edit-fields {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .inline-edit-form {
+        padding: 10px 4vw 8px 4vw;
+    }
+}
+
+@media (min-width: 600px) {
+
+    .input-form,
+    .export-filters,
+    #export-data,
+    #trip-list {
+        width: 500px;
+        max-width: 500px;
+    }
+
+    #edit-modal .modal-content {
+        width: 400px;
+    }
+
+    #trip-list li {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    #trip-list .trip-actions {
+        margin-top: 0;
+    }
 }

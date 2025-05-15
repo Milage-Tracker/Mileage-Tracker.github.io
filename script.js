@@ -12,14 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let trips = loadTrips();
     let editTripIndex = null;
-    const editModal = document.getElementById('edit-modal');
-    const editDateInput = document.getElementById('edit-date');
-    const editStartLocationInput = document.getElementById('edit-start-location');
-    const editEndLocationInput = document.getElementById('edit-end-location');
-    const editPurposeInput = document.getElementById('edit-purpose');
-    const editDistanceInput = document.getElementById('edit-distance');
-    const saveEditButton = document.getElementById('save-edit');
-    const cancelEditButton = document.getElementById('cancel-edit');
+    let currentEditIndex = null;
 
     renderTrips();
 
@@ -29,27 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     exportFilterRadios.forEach(radio => {
         radio.addEventListener('change', updateFilterInputs);
     });
-
-    saveEditButton.addEventListener('click', () => {
-        if (editTripIndex === null) return;
-        const updatedTrip = {
-            date: editDateInput.value,
-            startLocation: editStartLocationInput.value.trim(),
-            endLocation: editEndLocationInput.value.trim(),
-            purpose: editPurposeInput.value.trim(),
-            distance: parseFloat(editDistanceInput.value)
-        };
-        if (!updatedTrip.date || isNaN(updatedTrip.distance)) {
-            alert('Please enter a valid date and distance.');
-            return;
-        }
-        trips[editTripIndex] = updatedTrip;
-        saveTrips();
-        renderTrips();
-        closeEditModal();
-    });
-
-    cancelEditButton.addEventListener('click', closeEditModal);
 
     function addTrip() {
         const date = dateInput.value;
@@ -92,36 +64,73 @@ document.addEventListener('DOMContentLoaded', () => {
             if (trip.endLocation) listItem.textContent += ` (To: ${trip.endLocation})`;
             if (trip.purpose) listItem.textContent += ` - Purpose: ${trip.purpose}`;
 
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'trip-actions';
+
             const editButton = document.createElement('button');
             editButton.textContent = 'Edit';
-            editButton.style.marginLeft = '10px';
-            editButton.addEventListener('click', () => openEditModal(index));
-            listItem.appendChild(editButton);
+            editButton.addEventListener('click', () => toggleInlineEdit(index, listItem));
+            actionsDiv.appendChild(editButton);
 
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
-            deleteButton.style.marginLeft = '10px';
             deleteButton.addEventListener('click', () => deleteTrip(index));
-            listItem.appendChild(deleteButton);
+            actionsDiv.appendChild(deleteButton);
 
+            listItem.appendChild(actionsDiv);
             tripList.appendChild(listItem);
         });
     }
 
-    function openEditModal(index) {
-        editTripIndex = index;
+    function toggleInlineEdit(index, listItem) {
+        // Remove any existing inline editor
+        const existing = document.getElementById('inline-edit-form');
+        if (existing) existing.remove();
+        if (currentEditIndex === index) {
+            currentEditIndex = null;
+            return;
+        }
+        currentEditIndex = index;
         const trip = trips[index];
-        editDateInput.value = trip.date;
-        editStartLocationInput.value = trip.startLocation;
-        editEndLocationInput.value = trip.endLocation;
-        editPurposeInput.value = trip.purpose;
-        editDistanceInput.value = trip.distance;
-        editModal.style.display = 'flex';
-    }
-
-    function closeEditModal() {
-        editModal.style.display = 'none';
-        editTripIndex = null;
+        const form = document.createElement('form');
+        form.id = 'inline-edit-form';
+        form.className = 'inline-edit-form';
+        form.innerHTML = `
+            <div class="inline-edit-fields">
+                <input type="date" id="inline-edit-date" value="${trip.date}" required />
+                <input type="text" id="inline-edit-start-location" value="${trip.startLocation || ''}" placeholder="Start Location" />
+                <input type="text" id="inline-edit-end-location" value="${trip.endLocation || ''}" placeholder="End Location" />
+                <input type="text" id="inline-edit-purpose" value="${trip.purpose || ''}" placeholder="Purpose" />
+                <input type="number" id="inline-edit-distance" value="${trip.distance}" required placeholder="Distance (miles)" />
+            </div>
+            <div class="inline-edit-actions">
+                <button type="submit">Save</button>
+                <button type="button" id="inline-cancel">Cancel</button>
+            </div>
+        `;
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const updatedTrip = {
+                date: form.querySelector('#inline-edit-date').value,
+                startLocation: form.querySelector('#inline-edit-start-location').value.trim(),
+                endLocation: form.querySelector('#inline-edit-end-location').value.trim(),
+                purpose: form.querySelector('#inline-edit-purpose').value.trim(),
+                distance: parseFloat(form.querySelector('#inline-edit-distance').value)
+            };
+            if (!updatedTrip.date || isNaN(updatedTrip.distance)) {
+                alert('Please enter a valid date and distance.');
+                return;
+            }
+            trips[index] = updatedTrip;
+            saveTrips();
+            renderTrips();
+            currentEditIndex = null;
+        });
+        form.querySelector('#inline-cancel').addEventListener('click', () => {
+            form.remove();
+            currentEditIndex = null;
+        });
+        listItem.insertAdjacentElement('afterend', form);
     }
 
     function deleteTrip(index) {
