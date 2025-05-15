@@ -131,8 +131,32 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('No trips to export for the selected filter.');
             return;
         }
-
-        // Prepare table columns and rows
+        // Determine header text for the export
+        let headerText = 'Mileage Log';
+        const selected = document.querySelector('input[name="export-filter"]:checked').value;
+        if (selected === 'range') {
+            const start = document.getElementById('filter-start').value;
+            const end = document.getElementById('filter-end').value;
+            if (start && end) {
+                headerText += ` (From ${start} to ${end})`;
+            }
+        } else if (selected === 'month') {
+            const month = document.getElementById('filter-month').value;
+            if (month) {
+                // Correct month index: JS Date months are 0-based, but input is 1-based
+                const [y, m] = month.split('-');
+                const monthIndex = parseInt(m, 10) - 1; // Subtract 1 for correct month
+                const monthName = new Date(y, monthIndex).toLocaleString('default', { month: 'long' });
+                headerText += ` (${monthName} ${y})`;
+            }
+        } else if (selected === 'year') {
+            const year = document.getElementById('filter-year').value;
+            if (year) {
+                headerText += ` (${year})`;
+            }
+        } else {
+            headerText += ' (All Time)';
+        }
         const columns = [
             { header: 'Date', dataKey: 'date' },
             { header: 'Start Location', dataKey: 'startLocation' },
@@ -147,10 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
             purpose: trip.purpose,
             distance: trip.distance
         }));
-
-        // Create PDF
         const doc = new window.jspdf.jsPDF();
-        doc.text('Mileage Log', 14, 16);
+        doc.text(headerText, 14, 16);
         doc.autoTable({
             columns: columns,
             body: rows,
