@@ -25,6 +25,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const auth = firebase.auth();
 
+    // --- HIDE APP UNTIL LOGGED IN ---
+    const appContainer = document.getElementById('app-container');
+    const googleSigninContainer = document.getElementById('google-signin-container');
+    function showAppForUser(user) {
+        if (user) {
+            // Hide Google sign-in, show app
+            if (googleSigninContainer) googleSigninContainer.style.display = 'none';
+            if (appContainer) {
+                // Show everything except the Google sign-in
+                Array.from(appContainer.children).forEach(child => {
+                    if (child !== googleSigninContainer) child.style.display = '';
+                });
+            }
+        } else {
+            // Show only Google sign-in
+            if (googleSigninContainer) googleSigninContainer.style.display = '';
+            if (appContainer) {
+                Array.from(appContainer.children).forEach(child => {
+                    if (child !== googleSigninContainer) child.style.display = 'none';
+                });
+            }
+        }
+    }
+    // Initial hide (in case of flash)
+    if (appContainer) {
+        Array.from(appContainer.children).forEach(child => {
+            if (child !== googleSigninContainer) child.style.display = 'none';
+        });
+    }
+    // Listen for auth state
+    auth.onAuthStateChanged(user => {
+        showAppForUser(user);
+        if (!user) {
+            // Optionally, clear profile info
+            if (profileEmail) profileEmail.textContent = '';
+            if (profileModalEmail) profileModalEmail.textContent = '';
+        }
+    });
+
     // Only one auth state listener
     auth.onAuthStateChanged(user => {
         if (!user) {
@@ -140,6 +179,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     profileMessage.textContent = err.message || 'Error deleting account.';
                 }
             }
+        });
+    }
+    // --- GOOGLE SIGN-IN LOGIC ---
+    const googleSignInBtn = document.getElementById('google-signin-btn');
+    if (googleSignInBtn) {
+        googleSignInBtn.addEventListener('click', function () {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    // User signed in, reload to update UI
+                    window.location.reload();
+                })
+                .catch((error) => {
+                    alert('Google sign-in failed: ' + (error.message || error));
+                });
         });
     }
     // --- FIREBASE AUTH LOGIC END ---
