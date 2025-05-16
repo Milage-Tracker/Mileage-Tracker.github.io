@@ -4,13 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const endLocationInput = document.getElementById('end-location');
     const purposeInput = document.getElementById('purpose');
     const distanceInput = document.getElementById('distance');
-    const addTripButton = document.getElementById('add-trip');
     const tripList = document.getElementById('trip-list');
-    const exportDataButton = document.getElementById('export-data');
-    const filterInputs = document.getElementById('filter-inputs');
-    const exportFilterRadios = document.getElementsByName('export-filter');
 
     // --- FIREBASE AUTH LOGIC START ---
+    // Your Firebase config object (replace with your own from Firebase Console)
     const firebaseConfig = {
         apiKey: "AIzaSyClCS--vMtgqiAJ5I4DOoo_7ZofzgygF3w",
         authDomain: "milage-tracker-aeb71.firebaseapp.com",
@@ -19,130 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
         messagingSenderId: "1033990559453",
         appId: "1:1033990559453:web:71f88d296c878800012d34"
     };
+
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
+
+    // Initialize Firestore
+    const db = firebase.firestore();
+
     const auth = firebase.auth();
 
-    // Redirect to login if not logged in
-    if (!auth.currentUser) {
-        auth.onAuthStateChanged(user => {
-            if (!user) {
-                window.location.href = 'login.html';
-            }
-        });
-    }
-
-    function isLoggedIn() {
-        return !!auth.currentUser;
-    }
-    function showLogin() {
-        loginContainer.style.display = 'block';
-        appContainer.style.display = 'none';
-    }
-    function showApp() {
-        loginContainer.style.display = 'none';
-        appContainer.style.display = '';
-    }
-    // Listen for auth state changes
+    // Only one auth state listener
     auth.onAuthStateChanged(user => {
-        if (user) {
-            showApp();
+        if (!user) {
+            window.location.href = 'login.html';
         } else {
-            showLogin();
+            updateProfileUI();
         }
-    });
-    loginForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const username = document.getElementById('login-username').value.trim();
-        const password = document.getElementById('login-password').value;
-        // Firebase uses email for login, so you may want to require email or append a domain
-        auth.signInWithEmailAndPassword(username, password)
-            .then(() => {
-                loginError.style.display = 'none';
-            })
-            .catch(error => {
-                loginError.textContent = error.message;
-                loginError.style.display = 'block';
-            });
-    });
-
-    const signupForm = document.getElementById('signup-form');
-    const resetForm = document.getElementById('reset-form');
-    const showSignupBtn = document.getElementById('show-signup');
-    const showResetBtn = document.getElementById('show-reset');
-    const cancelSignupBtn = document.getElementById('cancel-signup');
-    const cancelResetBtn = document.getElementById('cancel-reset');
-    const loginSuccess = document.getElementById('login-success');
-
-    // Toggle forms
-    showSignupBtn.addEventListener('click', () => {
-        loginForm.style.display = 'none';
-        signupForm.style.display = '';
-        resetForm.style.display = 'none';
-        loginError.style.display = 'none';
-        loginSuccess.style.display = 'none';
-    });
-    showResetBtn.addEventListener('click', () => {
-        loginForm.style.display = 'none';
-        signupForm.style.display = 'none';
-        resetForm.style.display = '';
-        loginError.style.display = 'none';
-        loginSuccess.style.display = 'none';
-    });
-    cancelSignupBtn.addEventListener('click', () => {
-        loginForm.style.display = '';
-        signupForm.style.display = 'none';
-        resetForm.style.display = 'none';
-        loginError.style.display = 'none';
-        loginSuccess.style.display = 'none';
-    });
-    cancelResetBtn.addEventListener('click', () => {
-        loginForm.style.display = '';
-        signupForm.style.display = 'none';
-        resetForm.style.display = 'none';
-        loginError.style.display = 'none';
-        loginSuccess.style.display = 'none';
-    });
-
-    // Signup
-    signupForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const email = document.getElementById('signup-email').value.trim();
-        const password = document.getElementById('signup-password').value;
-        auth.createUserWithEmailAndPassword(email, password)
-            .then(() => {
-                loginSuccess.textContent = 'Signup successful! You can now log in.';
-                loginSuccess.style.display = 'block';
-                loginError.style.display = 'none';
-                signupForm.reset();
-                setTimeout(() => {
-                    loginForm.style.display = '';
-                    signupForm.style.display = 'none';
-                    loginSuccess.style.display = 'none';
-                }, 1500);
-            })
-            .catch(error => {
-                loginError.textContent = error.message;
-                loginError.style.display = 'block';
-                loginSuccess.style.display = 'none';
-            });
-    });
-
-    // Reset password
-    resetForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const email = document.getElementById('reset-email').value.trim();
-        auth.sendPasswordResetEmail(email)
-            .then(() => {
-                loginSuccess.textContent = 'Password reset email sent!';
-                loginSuccess.style.display = 'block';
-                loginError.style.display = 'none';
-                resetForm.reset();
-            })
-            .catch(error => {
-                loginError.textContent = error.message;
-                loginError.style.display = 'block';
-                loginSuccess.style.display = 'none';
-            });
     });
 
     // Profile/Logout logic
@@ -157,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileMessage = document.getElementById('profile-message');
 
     function updateProfileUI() {
-        if (auth.currentUser) {
+        if (auth.currentUser && profileEmail && profileModalEmail) {
             profileEmail.textContent = auth.currentUser.email;
             profileModalEmail.textContent = auth.currentUser.email;
         }
@@ -170,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    if (profileBtn) {
+    if (profileBtn && profileModal && profilePassword && profileMessage) {
         profileBtn.addEventListener('click', () => {
             updateProfileUI();
             profileModal.style.display = 'flex';
@@ -178,12 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
             profileMessage.textContent = '';
         });
     }
-    if (profileClose) {
+    if (profileClose && profileModal) {
         profileClose.addEventListener('click', () => {
             profileModal.style.display = 'none';
         });
     }
-    if (profileSave) {
+    if (profileSave && profilePassword && profileMessage) {
         profileSave.addEventListener('click', () => {
             const newPassword = profilePassword.value;
             profileMessage.textContent = '';
@@ -192,16 +81,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 profileMessage.style.color = '#c0392b';
                 return;
             }
-            auth.currentUser.updatePassword(newPassword)
-                .then(() => {
-                    profileMessage.textContent = 'Password updated!';
-                    profileMessage.style.color = '#27ae60';
-                    profilePassword.value = '';
-                })
-                .catch(error => {
-                    profileMessage.textContent = error.message;
-                    profileMessage.style.color = '#c0392b';
-                });
+            if (auth.currentUser) {
+                auth.currentUser.updatePassword(newPassword)
+                    .then(() => {
+                        profileMessage.textContent = 'Password updated!';
+                        profileMessage.style.color = '#27ae60';
+                        profilePassword.value = '';
+                    })
+                    .catch(error => {
+                        profileMessage.textContent = error.message;
+                        profileMessage.style.color = '#c0392b';
+                    });
+            }
         });
     }
     // Hide modal on outside click
@@ -210,85 +101,227 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === profileModal) profileModal.style.display = 'none';
         });
     }
-    // Update profile UI on login
-    auth.onAuthStateChanged(user => {
-        if (user) updateProfileUI();
-    });
-    // --- FIREBASE AUTH LOGIC END ---
 
-    let trips = loadTrips();
-    let editTripIndex = null;
-    let currentEditIndex = null;
-
-    renderTrips();
-
-    addTripButton.addEventListener('click', addTrip);
-    exportDataButton.addEventListener('click', exportTrips);
-
-    exportFilterRadios.forEach(radio => {
-        radio.addEventListener('change', updateFilterInputs);
-    });
-
-    function addTrip() {
-        const date = dateInput.value;
-        const startLocation = startLocationInput.value.trim();
-        const endLocation = endLocationInput.value.trim();
-        const purpose = purposeInput.value.trim();
-        const distance = parseFloat(distanceInput.value);
-
-        if (!date || isNaN(distance)) {
-            alert('Please enter a valid date and distance.');
-            return;
-        }
-
-        const newTrip = {
-            date,
-            startLocation,
-            endLocation,
-            purpose,
-            distance
-        };
-
-        trips.push(newTrip);
-        saveTrips();
-        renderTrips();
-
-        // Clear input fields after adding
-        dateInput.value = '';
-        startLocationInput.value = '';
-        endLocationInput.value = '';
-        purposeInput.value = '';
-        distanceInput.value = '';
+    const profileDelete = document.createElement('button');
+    profileDelete.id = 'profile-delete';
+    profileDelete.textContent = 'Delete Account';
+    // Removed inline styles, now handled by CSS
+    if (profileModal) {
+        // Insert before the message div
+        const msgDiv = profileModal.querySelector('#profile-message');
+        if (msgDiv) profileModal.querySelector('div').appendChild(profileDelete);
     }
 
-    function renderTrips() {
+    // Delete account logic
+    if (profileDelete && profileMessage) {
+        profileDelete.addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to delete your account? This cannot be undone.')) return;
+            profileMessage.textContent = '';
+            profileMessage.style.color = '#c0392b';
+            try {
+                const user = auth.currentUser;
+                if (!user) throw new Error('No user logged in.');
+                // Delete all trips from Firestore
+                const tripsCol = db.collection('users').doc(user.uid).collection('trips');
+                const tripsSnap = await tripsCol.get();
+                const batch = db.batch();
+                tripsSnap.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                // Delete user document
+                await db.collection('users').doc(user.uid).delete();
+                // Delete Firebase Auth account
+                await user.delete();
+                alert('Account deleted.');
+                window.location.href = 'login.html';
+            } catch (err) {
+                if (err.code === 'auth/requires-recent-login') {
+                    profileMessage.textContent = 'Please log out and log in again before deleting your account.';
+                } else {
+                    profileMessage.textContent = err.message || 'Error deleting account.';
+                }
+            }
+        });
+    }
+    // --- FIREBASE AUTH LOGIC END ---
+
+    // --- FIRESTORE TRIP STORAGE START ---
+    // Helper: Get Firestore trips collection for current user
+    function getTripsCollection() {
+        if (!auth.currentUser) return null;
+        return db.collection('users').doc(auth.currentUser.uid).collection('trips');
+    }
+
+    // Load trips from Firestore
+    async function loadTripsFromFirestore() {
+        const tripsCol = getTripsCollection();
+        if (!tripsCol) return [];
+        const snapshot = await tripsCol.orderBy('date').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    // Save a new trip to Firestore
+    async function addTripToFirestore(trip) {
+        const tripsCol = getTripsCollection();
+        if (!tripsCol) return;
+        await tripsCol.add(trip);
+    }
+
+    // Update a trip in Firestore
+    async function updateTripInFirestore(id, trip) {
+        const tripsCol = getTripsCollection();
+        if (!tripsCol) return;
+        await tripsCol.doc(id).set(trip);
+    }
+
+    // Delete a trip from Firestore
+    async function deleteTripFromFirestore(id) {
+        const tripsCol = getTripsCollection();
+        if (!tripsCol) return;
+        await tripsCol.doc(id).delete();
+    }
+
+    let trips = [];
+    let currentEditIndex = null;
+
+    // Wait for auth before loading trips
+    auth.onAuthStateChanged(async user => {
+        if (user) {
+            trips = await loadTripsFromFirestore();
+            renderTrips();
+        }
+    });
+
+    async function renderTrips() {
+        if (!tripList) return;
+        // Save open dropdowns
+        const openYears = new Set();
+        const openMonths = new Set();
+        document.querySelectorAll('.trip-year-dropdown[open]').forEach(d => openYears.add(d.querySelector('summary').textContent));
+        document.querySelectorAll('.trip-month-dropdown[open]').forEach(d => {
+            const parentYear = d.closest('.trip-year-dropdown')?.querySelector('summary')?.textContent;
+            const month = d.querySelector('summary').textContent;
+            if (parentYear && month) openMonths.add(parentYear + '|' + month);
+        });
+
         tripList.innerHTML = '';
+        if (!trips.length) return;
+
+        // Get current year and month
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1; // 1-based
+
+        // Group trips by year and month
+        const grouped = {};
         trips.forEach((trip, index) => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${trip.date} - ${trip.distance} miles`;
-            if (trip.startLocation) listItem.textContent += ` (From: ${trip.startLocation})`;
-            if (trip.endLocation) listItem.textContent += ` (To: ${trip.endLocation})`;
-            if (trip.purpose) listItem.textContent += ` - Purpose: ${trip.purpose}`;
+            const [year, month] = trip.date.split('-');
+            if (!grouped[year]) grouped[year] = {};
+            if (!grouped[year][month]) grouped[year][month] = [];
+            grouped[year][month].push({ ...trip, index });
+        });
 
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'trip-actions';
+        // Render current month trips inside a box styled like dropdowns
+        const thisMonthTrips = grouped[currentYear] && grouped[currentYear][String(currentMonth).padStart(2, '0')];
+        if (thisMonthTrips && thisMonthTrips.length) {
+            const thisMonthDetails = document.createElement('details');
+            thisMonthDetails.className = 'trip-year-dropdown';
+            thisMonthDetails.open = true;
+            const thisMonthSummary = document.createElement('summary');
+            // Add month name and year in parenthesis
+            const monthName = new Date(currentYear, currentMonth - 1, 1).toLocaleString('default', { month: 'long' });
+            thisMonthSummary.textContent = `This Month (${monthName} ${currentYear})`;
+            thisMonthDetails.appendChild(thisMonthSummary);
+            thisMonthTrips.forEach(({ index, ...trip }) => {
+                const listItem = createTripListItem(trip, index);
+                thisMonthDetails.appendChild(listItem);
+            });
+            tripList.appendChild(thisMonthDetails);
+        }
 
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Edit';
-            editButton.addEventListener('click', () => toggleInlineEdit(index, listItem));
-            actionsDiv.appendChild(editButton);
-
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.addEventListener('click', () => deleteTrip(index));
-            actionsDiv.appendChild(deleteButton);
-
-            listItem.appendChild(actionsDiv);
-            tripList.appendChild(listItem);
+        // Render dropdowns for other years/months
+        Object.keys(grouped).sort((a, b) => b - a).forEach(year => {
+            if (Number(year) === currentYear) {
+                const months = Object.keys(grouped[year]).filter(m => Number(m) !== currentMonth);
+                if (months.length) {
+                    const yearDetails = document.createElement('details');
+                    yearDetails.className = 'trip-year-dropdown';
+                    const yearSummary = document.createElement('summary');
+                    yearSummary.textContent = year;
+                    yearDetails.appendChild(yearSummary);
+                    // Restore open state
+                    if (openYears.has(year)) yearDetails.open = true;
+                    months.sort((a, b) => b - a).forEach(month => {
+                        const monthDetails = document.createElement('details');
+                        monthDetails.className = 'trip-month-dropdown';
+                        const monthSummary = document.createElement('summary');
+                        const monthNum = parseInt(month, 10);
+                        const monthName = new Date(year, monthNum - 1, 1).toLocaleString('default', { month: 'long' });
+                        monthSummary.textContent = monthName;
+                        monthDetails.appendChild(monthSummary);
+                        // Restore open state
+                        if (openMonths.has(year + '|' + monthName)) monthDetails.open = true;
+                        grouped[year][month].forEach(({ index, ...trip }) => {
+                            const listItem = createTripListItem(trip, index);
+                            monthDetails.appendChild(listItem);
+                        });
+                        yearDetails.appendChild(monthDetails);
+                    });
+                    tripList.appendChild(yearDetails);
+                }
+            } else {
+                const yearDetails = document.createElement('details');
+                yearDetails.className = 'trip-year-dropdown';
+                const yearSummary = document.createElement('summary');
+                yearSummary.textContent = year;
+                yearDetails.appendChild(yearSummary);
+                if (openYears.has(year)) yearDetails.open = true;
+                Object.keys(grouped[year]).sort((a, b) => b - a).forEach(month => {
+                    const monthDetails = document.createElement('details');
+                    monthDetails.className = 'trip-month-dropdown';
+                    const monthSummary = document.createElement('summary');
+                    const monthNum = parseInt(month, 10);
+                    const monthName = new Date(year, monthNum - 1, 1).toLocaleString('default', { month: 'long' });
+                    monthSummary.textContent = monthName;
+                    monthDetails.appendChild(monthSummary);
+                    if (openMonths.has(year + '|' + monthName)) monthDetails.open = true;
+                    grouped[year][month].forEach(({ index, ...trip }) => {
+                        const listItem = createTripListItem(trip, index);
+                        monthDetails.appendChild(listItem);
+                    });
+                    yearDetails.appendChild(monthDetails);
+                });
+                tripList.appendChild(yearDetails);
+            }
         });
     }
 
-    function toggleInlineEdit(index, listItem) {
+    function createTripListItem(trip, index) {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${trip.date} - ${trip.distance} miles`;
+        if (trip.startLocation) listItem.textContent += ` (From: ${trip.startLocation})`;
+        if (trip.endLocation) listItem.textContent += ` (To: ${trip.endLocation})`;
+        if (trip.purpose) listItem.textContent += ` - Purpose: ${trip.purpose}`;
+
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'trip-actions';
+
+        const editButton = document.createElement('button');
+        editButton.className = 'edit-btn';
+        editButton.textContent = 'Edit';
+        editButton.addEventListener('click', () => toggleInlineEdit(index, listItem));
+        actionsDiv.appendChild(editButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-btn';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => deleteTrip(index));
+        actionsDiv.appendChild(deleteButton);
+
+        listItem.appendChild(actionsDiv);
+        return listItem;
+    }
+
+    async function toggleInlineEdit(index, listItem) {
         // Remove any existing inline editor
         const existing = document.getElementById('inline-edit-form');
         if (existing) existing.remove();
@@ -314,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button type="button" id="inline-cancel">Cancel</button>
             </div>
         `;
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const updatedTrip = {
                 date: form.querySelector('#inline-edit-date').value,
@@ -327,8 +360,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Please enter a valid date and distance.');
                 return;
             }
-            trips[index] = updatedTrip;
-            saveTrips();
+            await updateTripInFirestore(trip.id, updatedTrip);
+            trips = await loadTripsFromFirestore();
             renderTrips();
             currentEditIndex = null;
         });
@@ -339,122 +372,483 @@ document.addEventListener('DOMContentLoaded', () => {
         listItem.insertAdjacentElement('afterend', form);
     }
 
-    function deleteTrip(index) {
-        trips.splice(index, 1);
-        saveTrips();
+    async function deleteTrip(index) {
+        const trip = trips[index];
+        if (!confirm('Are you sure you want to delete this trip?')) return;
+        await deleteTripFromFirestore(trip.id);
+        trips = await loadTripsFromFirestore();
         renderTrips();
     }
 
-    function saveTrips() {
-        localStorage.setItem('trips', JSON.stringify(trips));
+    // Add Trip Modal logic
+    const showAddTripBtn = document.getElementById('show-add-trip');
+    const addTripModal = document.getElementById('add-trip-modal');
+    const addTripForm = document.getElementById('add-trip-form');
+    const cancelAddTripBtn = document.getElementById('cancel-add-trip');
+
+    function openAddTripModal() {
+        if (addTripModal) addTripModal.style.display = 'flex';
+    }
+    function closeAddTripModal() {
+        if (addTripModal) addTripModal.style.display = 'none';
+        if (addTripForm) addTripForm.reset();
+    }
+    if (showAddTripBtn) showAddTripBtn.addEventListener('click', openAddTripModal);
+    if (cancelAddTripBtn) cancelAddTripBtn.addEventListener('click', closeAddTripModal);
+    if (addTripModal) {
+        addTripModal.addEventListener('click', (e) => {
+            if (e.target === addTripModal) closeAddTripModal();
+        });
     }
 
-    function loadTrips() {
-        const storedTrips = localStorage.getItem('trips');
-        return storedTrips ? JSON.parse(storedTrips) : [];
+    // Replace addTripButton logic to use modal form
+    if (addTripForm) {
+        addTripForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const date = document.getElementById('date').value;
+            const startLocation = document.getElementById('start-location').value.trim();
+            const endLocation = document.getElementById('end-location').value.trim();
+            const purpose = document.getElementById('purpose').value.trim();
+            const distance = parseFloat(document.getElementById('distance').value);
+            if (!date || isNaN(distance)) {
+                alert('Please enter a valid date and distance.');
+                return;
+            }
+            const newTrip = {
+                date,
+                startLocation,
+                endLocation,
+                purpose,
+                distance
+            };
+            await addTripToFirestore(newTrip);
+            trips = await loadTripsFromFirestore();
+            renderTrips();
+            closeAddTripModal();
+        });
     }
 
-    function updateFilterInputs() {
-        const selected = document.querySelector('input[name="export-filter"]:checked').value;
-        filterInputs.innerHTML = '';
-        if (selected === 'range') {
-            filterInputs.innerHTML = `
-                <input type="date" id="filter-start" style="margin-left:5px;"> to
-                <input type="date" id="filter-end">`;
-        } else if (selected === 'month') {
-            filterInputs.innerHTML = `
-                <input type="month" id="filter-month" style="margin-left:5px;">`;
-        } else if (selected === 'year') {
-            filterInputs.innerHTML = `
-                <input type="number" id="filter-year" min="1900" max="2100" placeholder="Year" style="width:80px;margin-left:5px;">`;
+    // PDF Export logic
+    function addExportPdfButton() {
+        if (document.getElementById('export-pdf')) return;
+        const btn = document.createElement('button');
+        btn.id = 'export-pdf';
+        btn.textContent = 'Export Trips to PDF';
+        btn.addEventListener('click', exportTripsToPdf);
+        const filters = document.getElementById('export-filters');
+        if (filters && filters.parentNode) filters.parentNode.insertBefore(btn, filters.nextSibling);
+    }
+
+    // --- Export Range Logic ---
+    const exportRange = document.getElementById('export-range');
+    const customRangeFields = document.getElementById('custom-range-fields');
+    if (exportRange && customRangeFields) {
+        exportRange.addEventListener('change', function () {
+            if (this.value === 'custom') {
+                customRangeFields.style.display = '';
+            } else {
+                customRangeFields.style.display = 'none';
+            }
+        });
+    }
+
+    function getExportDateRange() {
+        const now = new Date();
+        let start, end;
+        switch ((exportRange && exportRange.value) || 'this-month') {
+            case 'this-month':
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                break;
+            case 'last-month':
+                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                end = new Date(now.getFullYear(), now.getMonth(), 0);
+                break;
+            case 'this-year':
+                start = new Date(now.getFullYear(), 0, 1);
+                end = new Date(now.getFullYear(), 11, 31);
+                break;
+            case 'last-year':
+                start = new Date(now.getFullYear() - 1, 0, 1);
+                end = new Date(now.getFullYear() - 1, 11, 31);
+                break;
+            case 'custom':
+                const s = document.getElementById('custom-start').value;
+                const e = document.getElementById('custom-end').value;
+                if (s && e) {
+                    start = new Date(s);
+                    end = new Date(e);
+                }
+                break;
+            default:
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        }
+        // Set time to cover whole days
+        if (start) start.setHours(0, 0, 0, 0);
+        if (end) end.setHours(23, 59, 59, 999);
+        return { start, end };
+    }
+
+    function filterTripsByDate(trips, range) {
+        if (!range.start || !range.end) return trips;
+        return trips.filter(trip => {
+            const d = new Date(trip.date);
+            return d >= range.start && d <= range.end;
+        });
+    }
+
+    function getExportHeading(rangeType, range) {
+        const now = new Date();
+        switch (rangeType) {
+            case 'this-month':
+                return `Miles Driven Log\nThis Month (${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()})`;
+            case 'last-month': {
+                const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                return `Miles Driven Log\nLast Month (${lastMonth.toLocaleString('default', { month: 'long' })} ${lastMonth.getFullYear()})`;
+            }
+            case 'this-year':
+                return `Miles Driven Log\nThis Year (${now.getFullYear()})`;
+            case 'last-year':
+                return `Miles Driven Log\nLast Year (${now.getFullYear() - 1})`;
+            case 'custom':
+                if (range.start && range.end) {
+                    return `Miles Driven Log\n${range.start.toLocaleDateString()} to ${range.end.toLocaleDateString()}`;
+                }
+                return 'Miles Driven Log\nCustom Range';
+            default:
+                return 'Miles Driven Log';
         }
     }
-    updateFilterInputs();
 
-    function getFilteredTrips() {
-        const selected = document.querySelector('input[name="export-filter"]:checked').value;
-        if (selected === 'all') {
-            return trips;
-        } else if (selected === 'range') {
-            const start = document.getElementById('filter-start').value;
-            const end = document.getElementById('filter-end').value;
-            if (!start || !end) return [];
-            return trips.filter(trip => trip.date >= start && trip.date <= end);
-        } else if (selected === 'month') {
-            const month = document.getElementById('filter-month').value;
-            if (!month) return [];
-            // month is in format YYYY-MM
-            return trips.filter(trip => trip.date && trip.date.startsWith(month));
-        } else if (selected === 'year') {
-            const year = document.getElementById('filter-year').value;
-            if (!year) return [];
-            return trips.filter(trip => trip.date && trip.date.startsWith(year + '-'));
+    function getPrintFilename(rangeType, range) {
+        const now = new Date();
+        switch (rangeType) {
+            case 'this-month':
+                return `MilesDriven_${now.toLocaleString('default', { month: 'long' })}_${now.getFullYear()}`;
+            case 'last-month': {
+                const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                return `MilesDriven_${lastMonth.toLocaleString('default', { month: 'long' })}_${lastMonth.getFullYear()}`;
+            }
+            case 'this-year':
+                return `MilesDriven_${now.getFullYear()}`;
+            case 'last-year':
+                return `MilesDriven_${now.getFullYear() - 1}`;
+            case 'all-time':
+                return 'MilesDriven_All_Time';
+            case 'custom':
+                if (range.start && range.end) {
+                    // Use the original input values to avoid timezone shift
+                    const s = document.getElementById('custom-start-modal').value;
+                    const e = document.getElementById('custom-end-modal').value;
+                    if (s && e) {
+                        return `MilesDriven_${s.replace(/-/g, '_')}_to_${e.replace(/-/g, '_')}`;
+                    }
+                }
+                return 'MilesDriven_Custom_Range';
+            default:
+                return 'MilesDriven';
         }
-        return trips;
     }
 
-    function exportTrips() {
-        const filteredTrips = getFilteredTrips();
-        if (filteredTrips.length === 0) {
-            alert('No trips to export for the selected filter.');
+    async function exportTripsToPdf() {
+        if (!trips.length) {
+            alert('No trips to export.');
             return;
         }
-        // Determine header text for the export
-        let headerText = 'Mileage Log';
-        const selected = document.querySelector('input[name="export-filter"]:checked').value;
-        if (selected === 'range') {
-            const start = document.getElementById('filter-start').value;
-            const end = document.getElementById('filter-end').value;
-            if (start && end) {
-                headerText += ` (From ${start} to ${end})`;
-            }
-        } else if (selected === 'month') {
-            const month = document.getElementById('filter-month').value;
-            if (month) {
-                // Correct month index: JS Date months are 0-based, but input is 1-based
-                const [y, m] = month.split('-');
-                const monthIndex = parseInt(m, 10) - 1; // Subtract 1 for correct month
-                const monthName = new Date(y, monthIndex).toLocaleString('default', { month: 'long' });
-                headerText += ` (${monthName} ${y})`;
-            }
-        } else if (selected === 'year') {
-            const year = document.getElementById('filter-year').value;
-            if (year) {
-                headerText += ` (${year})`;
-            }
-        } else {
-            headerText += ' (All Time)';
+        const rangeType = (exportRange && exportRange.value) || 'this-month';
+        const range = getExportDateRange();
+        const filteredTrips = filterTripsByDate(trips, range);
+        if (!filteredTrips.length) {
+            alert('No trips found for the selected range.');
+            return;
         }
-        const columns = [
-            { header: 'Date', dataKey: 'date' },
-            { header: 'Start Location', dataKey: 'startLocation' },
-            { header: 'End Location', dataKey: 'endLocation' },
-            { header: 'Purpose', dataKey: 'purpose' },
-            { header: 'Distance (miles)', dataKey: 'distance' }
-        ];
-        const rows = filteredTrips.map(trip => ({
-            date: trip.date,
-            startLocation: trip.startLocation,
-            endLocation: trip.endLocation,
-            purpose: trip.purpose,
-            distance: trip.distance
-        }));
-        const doc = new window.jspdf.jsPDF();
-        doc.text(headerText, 14, 16);
-        doc.autoTable({
-            columns: columns,
-            body: rows,
-            startY: 22,
-            styles: { fontSize: 10 },
-            headStyles: { fillColor: [41, 128, 185] }
+        // Group filtered trips by year and month for export
+        const grouped = {};
+        filteredTrips.forEach(trip => {
+            const [year, month] = trip.date.split('-');
+            if (!grouped[year]) grouped[year] = {};
+            if (!grouped[year][month]) grouped[year][month] = [];
+            grouped[year][month].push(trip);
         });
-        doc.save('mileage_log.pdf');
+        // Build PDF content with styled tables
+        const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
+        let y = 40;
+        doc.setFontSize(20);
+        doc.setTextColor('#21618c');
+        doc.text(getExportHeading(rangeType, range), 40, y);
+        y += 50; // Increased from 30 to 50 for more space below heading
+        Object.keys(grouped).sort((a, b) => b - a).forEach(year => {
+            doc.setFontSize(16);
+            doc.setTextColor('#2980b9');
+            doc.text(year, 40, y);
+            y += 22;
+            Object.keys(grouped[year]).sort((a, b) => b - a).forEach(month => {
+                const monthNum = parseInt(month, 10);
+                const monthName = new Date(year, monthNum - 1, 1).toLocaleString('default', { month: 'long' });
+                doc.setFontSize(14);
+                doc.setTextColor('#2980b9');
+                doc.text('  ' + monthName, 50, y);
+                y += 18;
+                // Table headers with blue background
+                doc.setFontSize(11);
+                doc.setTextColor('#fff');
+                doc.setFillColor(41, 128, 185); // #2980b9
+                const headers = ['Date', 'Distance', 'From', 'To', 'Purpose'];
+                let x = 60;
+                let colWidths = [70, 60, 100, 100, 140];
+                let headerHeight = 18;
+                doc.rect(x - 2, y - headerHeight + 4, colWidths.reduce((a, b) => a + b, 0) + 8, headerHeight, 'F');
+                headers.forEach((h, i) => {
+                    doc.text(h, x + 4, y);
+                    x += colWidths[i];
+                });
+                y += headerHeight;
+                // Table rows with alternating background
+                grouped[year][month].forEach((trip, idx) => {
+                    x = 60;
+                    const row = [
+                        trip.date,
+                        trip.distance + ' mi',
+                        trip.startLocation || '',
+                        trip.endLocation || '',
+                        trip.purpose || ''
+                    ];
+                    // Alternate row color
+                    if (idx % 2 === 0) {
+                        doc.setFillColor(234, 243, 250); // #eaf3fa
+                        doc.rect(x - 2, y - 12, colWidths.reduce((a, b) => a + b, 0) + 8, 16, 'F');
+                    }
+                    doc.setTextColor('#222');
+                    row.forEach((cell, i) => {
+                        doc.text(String(cell), x + 4, y);
+                        x += colWidths[i];
+                    });
+                    y += 16;
+                    if (y > 780) {
+                        doc.addPage();
+                        y = 40;
+                    }
+                });
+                y += 10;
+            });
+            y += 8;
+        });
+        doc.save(getPrintFilename(rangeType, range) + '.pdf');
     }
+
+    // Export PDF Modal logic
+    const showExportModalBtn = document.getElementById('show-export-modal');
+    const exportModal = document.getElementById('export-modal');
+    const exportPdfModalBtn = document.getElementById('export-pdf-modal');
+    const cancelExportModalBtn = document.getElementById('cancel-export-modal');
+    const exportRangeModal = document.getElementById('export-range-modal');
+    const customRangeFieldsModal = document.getElementById('custom-range-fields-modal');
+    const customStartModal = document.getElementById('custom-start-modal');
+    const customEndModal = document.getElementById('custom-end-modal');
+
+    function openExportModal() {
+        if (exportModal) exportModal.style.display = 'flex';
+        if (exportRangeModal) exportRangeModal.value = 'this-month';
+        if (customRangeFieldsModal) customRangeFieldsModal.style.display = 'none';
+    }
+    function closeExportModal() {
+        if (exportModal) exportModal.style.display = 'none';
+        if (customStartModal) customStartModal.value = '';
+        if (customEndModal) customEndModal.value = '';
+    }
+    if (showExportModalBtn) showExportModalBtn.addEventListener('click', openExportModal);
+    if (cancelExportModalBtn) cancelExportModalBtn.addEventListener('click', closeExportModal);
+    if (exportModal) {
+        exportModal.addEventListener('click', (e) => {
+            if (e.target === exportModal) closeExportModal();
+        });
+    }
+    if (exportRangeModal && customRangeFieldsModal) {
+        exportRangeModal.addEventListener('change', function () {
+            if (this.value === 'custom') {
+                customRangeFieldsModal.style.display = '';
+            } else {
+                customRangeFieldsModal.style.display = 'none';
+            }
+        });
+    }
+
+    function getExportDateRangeModal() {
+        const now = new Date();
+        let start, end;
+        switch ((exportRangeModal && exportRangeModal.value) || 'this-month') {
+            case 'this-month':
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                break;
+            case 'last-month':
+                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                end = new Date(now.getFullYear(), now.getMonth(), 0);
+                break;
+            case 'this-year':
+                start = new Date(now.getFullYear(), 0, 1);
+                end = new Date(now.getFullYear(), 11, 31);
+                break;
+            case 'last-year':
+                start = new Date(now.getFullYear() - 1, 0, 1);
+                end = new Date(now.getFullYear() - 1, 11, 31);
+                break;
+            case 'all-time':
+                start = null;
+                end = null;
+                break;
+            case 'custom':
+                const s = customStartModal && customStartModal.value;
+                const e = customEndModal && customEndModal.value;
+                if (s && e) {
+                    start = new Date(s);
+                    end = new Date(e);
+                }
+                break;
+            default:
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        }
+        if (start) start.setHours(0, 0, 0, 0);
+        if (end) end.setHours(23, 59, 59, 999);
+        return { start, end };
+    }
+
+    function filterTripsByDateModal(trips, range) {
+        if (!range.start || !range.end) return trips;
+        return trips.filter(trip => {
+            const d = new Date(trip.date);
+            return d >= range.start && d <= range.end;
+        });
+    }
+
+    function getExportHeadingModal(rangeType, range) {
+        const now = new Date();
+        switch (rangeType) {
+            case 'this-month':
+                return `Miles Driven Log\nThis Month (${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()})`;
+            case 'last-month': {
+                const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                return `Miles Driven Log\nLast Month (${lastMonth.toLocaleString('default', { month: 'long' })} ${lastMonth.getFullYear()})`;
+            }
+            case 'this-year':
+                return `Miles Driven Log\nThis Year (${now.getFullYear()})`;
+            case 'last-year':
+                return `Miles Driven Log\nLast Year (${now.getFullYear() - 1})`;
+            case 'all-time':
+                return 'Miles Driven Log\nAll Time';
+            case 'custom':
+                if (range.start && range.end) {
+                    // Use the original input values to avoid timezone shift
+                    const s = document.getElementById('custom-start-modal').value;
+                    const e = document.getElementById('custom-end-modal').value;
+                    if (s && e) {
+                        return `Miles Driven Log\n${s} to ${e}`;
+                    }
+                }
+                return 'Miles Driven Log\nCustom Range';
+            default:
+                return 'Miles Driven Log';
+        }
+    }
+
+    if (exportPdfModalBtn) {
+        exportPdfModalBtn.addEventListener('click', async () => {
+            if (!trips.length) {
+                alert('No trips to export.');
+                return;
+            }
+            const rangeType = (exportRangeModal && exportRangeModal.value) || 'this-month';
+            const range = getExportDateRangeModal();
+            const filteredTrips = filterTripsByDateModal(trips, range);
+            if (!filteredTrips.length) {
+                alert('No trips found for the selected range.');
+                return;
+            }
+            // Group filtered trips by year and month for export
+            const grouped = {};
+            filteredTrips.forEach(trip => {
+                const [year, month] = trip.date.split('-');
+                if (!grouped[year]) grouped[year] = {};
+                if (!grouped[year][month]) grouped[year][month] = [];
+                grouped[year][month].push(trip);
+            });
+            // Build PDF content with styled tables
+            const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
+            let y = 40;
+            doc.setFontSize(20);
+            doc.setTextColor('#21618c');
+            doc.text(getExportHeadingModal(rangeType, range), 40, y);
+            y += 50;
+            Object.keys(grouped).sort((a, b) => b - a).forEach(year => {
+                doc.setFontSize(16);
+                doc.setTextColor('#2980b9');
+                doc.text(year, 40, y);
+                y += 22;
+                Object.keys(grouped[year]).sort((a, b) => b - a).forEach(month => {
+                    const monthNum = parseInt(month, 10);
+                    const monthName = new Date(year, monthNum - 1, 1).toLocaleString('default', { month: 'long' });
+                    doc.setFontSize(14);
+                    doc.setTextColor('#2980b9');
+                    doc.text('  ' + monthName, 50, y);
+                    y += 18;
+                    // Table headers with blue background
+                    doc.setFontSize(11);
+                    doc.setTextColor('#fff');
+                    doc.setFillColor(41, 128, 185); // #2980b9
+                    const headers = ['Date', 'Distance', 'From', 'To', 'Purpose'];
+                    let x = 60;
+                    let colWidths = [70, 60, 100, 100, 140];
+                    let headerHeight = 18;
+                    doc.rect(x - 2, y - headerHeight + 4, colWidths.reduce((a, b) => a + b, 0) + 8, headerHeight, 'F');
+                    headers.forEach((h, i) => {
+                        doc.text(h, x + 4, y);
+                        x += colWidths[i];
+                    });
+                    y += headerHeight;
+                    // Table rows with alternating background
+                    grouped[year][month].forEach((trip, idx) => {
+                        x = 60;
+                        const row = [
+                            trip.date,
+                            trip.distance + ' mi',
+                            trip.startLocation || '',
+                            trip.endLocation || '',
+                            trip.purpose || ''
+                        ];
+                        // Alternate row color
+                        if (idx % 2 === 0) {
+                            doc.setFillColor(234, 243, 250); // #eaf3fa
+                            doc.rect(x - 2, y - 12, colWidths.reduce((a, b) => a + b, 0) + 8, 16, 'F');
+                        }
+                        doc.setTextColor('#222');
+                        row.forEach((cell, i) => {
+                            doc.text(String(cell), x + 4, y);
+                            x += colWidths[i];
+                        });
+                        y += 16;
+                        if (y > 780) {
+                            doc.addPage();
+                            y = 40;
+                        }
+                    });
+                    y += 10;
+                });
+                y += 8;
+            });
+            doc.save(getPrintFilename(rangeType, range) + '.pdf');
+            closeExportModal();
+        });
+    }
+
+    addExportPdfButton();
 });
 
+// Service worker registration (relative path)
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('service-worker.js')
             .then(registration => {
                 console.log('Service worker registered:', registration);
             })

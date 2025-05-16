@@ -11,91 +11,118 @@
     <script src="https://www.gstatic.com/firebasejs/11.7.3/firebase-app-compat.js"></script>
     <!-- Firebase Auth -->
     <script src="https://www.gstatic.com/firebasejs/11.7.3/firebase-auth-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
     <div id="app-container">
-        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <span id="profile-email" style="color:#2980b9;font-weight:500;"></span>
-            <button id="profile-btn" style="background:none;border:none;color:#2980b9;cursor:pointer;">Profile</button>
-            <button id="logout-btn"
-                style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:6px 16px;cursor:pointer;">Logout</button>
+        <!-- Google Sign-In Button -->
+        <div id="google-signin-container" style="text-align:center; margin: 20px 0;">
+            <button id="google-signin-btn" class="main-google-btn">Login with Google</button>
         </div>
-        <div id="profile-modal" class="modal"
-            style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:2000; align-items:center; justify-content:center;">
-            <div
-                style="background:#fff; padding:24px 32px; border-radius:10px; min-width:260px; max-width:90vw; position:relative; box-shadow:0 2px 16px rgba(41,128,185,0.13);">
-                <h3 style="color:#2980b9;">Profile</h3>
-                <div style="margin-bottom:12px;">
-                    <label style="font-weight:500;">Email:</label>
+
+        <div class="flex-header">
+            <span id="profile-email" class="profile-email"></span>
+            <button id="profile-btn" class="profile-btn">Profile</button>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+        </div>
+        <div id="profile-modal" class="modal">
+            <div class="modal-content profile-modal-content">
+                <h3 class="modal-title">Profile</h3>
+                <div class="modal-section">
+                    <label class="modal-label">Email:</label>
                     <span id="profile-modal-email"></span>
                 </div>
-                <div style="margin-bottom:12px;">
-                    <label for="profile-password" style="font-weight:500;">New Password:</label>
-                    <input type="password" id="profile-password" style="width:100%;padding:8px;">
+                <div class="modal-section">
+                    <label for="profile-password" class="modal-label">New Password:</label>
+                    <input type="password" id="profile-password" class="modal-input">
                 </div>
-                <button id="profile-save"
-                    style="background:#2980b9;color:#fff;border:none;border-radius:4px;padding:8px 18px;">Change
-                    Password</button>
-                <button id="profile-close" style="margin-left:10px;">Close</button>
-                <div id="profile-message" style="margin-top:10px;text-align:center;"></div>
+                <button id="profile-save" class="modal-btn save-btn">Change Password</button>
+                <button id="profile-close" class="modal-btn cancel-btn">Close</button>
+                <div id="profile-message" class="modal-message"></div>
             </div>
         </div>
 
         <h1>Mileage Tracker</h1>
 
-        <div class="input-form">
-            <label for="date">Date (YYYY-MM-DD):</label>
-            <input type="date" id="date" required><br><br>
+        <button id="show-add-trip" class="main-add-trip-btn">Add Trip</button>
+        <button id="show-export-modal" class="main-export-btn">Print Trip Log</button>
+        <div id="add-trip-modal" class="modal">
+            <div class="modal-content">
+                <h3>Add Trip</h3>
+                <form id="add-trip-form">
+                    <label for="date">Date (YYYY-MM-DD): <span class="required">*</span></label>
+                    <input type="date" id="date" required><br><br>
 
-            <label for="start-location">Start Location:</label>
-            <input type="text" id="start-location"><br><br>
+                    <label for="start-location">Start Location:</label>
+                    <input type="text" id="start-location"><br><br>
 
-            <label for="end-location">End Location:</label>
-            <input type="text" id="end-location"><br><br>
+                    <label for="end-location">End Location:</label>
+                    <input type="text" id="end-location"><br><br>
 
-            <label for="purpose">Trip Purpose:</label>
-            <input type="text" id="purpose"><br><br>
+                    <label for="purpose">Trip Purpose:</label>
+                    <input type="text" id="purpose"><br><br>
 
-            <label for="distance">Distance (miles):</label>
-            <input type="number" id="distance" required><br><br>
+                    <label for="distance">Distance (miles): <span class="required">*</span></label>
+                    <input type="number" id="distance" required><br><br>
 
-            <button id="add-trip">Add Trip</button>
-            <button id="edit-trip" style="display:none; margin-left:10px;">Update Trip</button>
-        </div>
-
-        <h2>Trip Log</h2>
-        <ul id="trip-list">
-        </ul>
-
-        <div class="export-filters" style="margin-bottom: 16px;">
-            <label><input type="radio" name="export-filter" value="all" checked> All</label>
-            <label><input type="radio" name="export-filter" value="range"> Date Range</label>
-            <label><input type="radio" name="export-filter" value="month"> Month</label>
-            <label><input type="radio" name="export-filter" value="year"> Year</label>
-            <span id="filter-inputs" style="margin-left: 10px;"></span>
-        </div>
-
-        <button id="export-data">Export Data</button>
-
-        <div id="edit-modal" class="modal"
-            style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center;">
-            <div class="modal-content"
-                style="background:#fff; padding:24px 32px; border-radius:10px; min-width:300px; max-width:90vw; position:relative; box-shadow:0 2px 16px rgba(41,128,185,0.13);">
-                <h3>Edit Trip</h3>
-                <label>Date: <input type="date" id="edit-date"></label><br><br>
-                <label>Start Location: <input type="text" id="edit-start-location"></label><br><br>
-                <label>End Location: <input type="text" id="edit-end-location"></label><br><br>
-                <label>Purpose: <input type="text" id="edit-purpose"></label><br><br>
-                <label>Distance (miles): <input type="number" id="edit-distance"></label><br><br>
-                <button id="save-edit">Save</button>
-                <button id="cancel-edit" style="margin-left:10px;">Cancel</button>
+                    <button type="submit" id="add-trip">Add Trip</button>
+                    <button type="button" id="cancel-add-trip" class="modal-btn cancel-btn">Cancel</button>
+                </form>
             </div>
         </div>
 
+        <div id="export-modal" class="modal">
+            <div class="modal-content">
+                <h3>Print Trip Log</h3>
+                <div class="export-filters" id="export-filters-modal">
+                    <label for="export-range-modal">Print Range:</label>
+                    <select id="export-range-modal">
+                        <option value="all-time">All Time</option>
+                        <option value="this-month" selected>This Month</option>
+                        <option value="last-month">Last Month</option>
+                        <option value="this-year">This Year</option>
+                        <option value="last-year">Last Year</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                    <span id="custom-range-fields-modal" style="display:none">
+                        <label for="custom-start-modal">From:</label>
+                        <input type="date" id="custom-start-modal">
+                        <label for="custom-end-modal">To:</label>
+                        <input type="date" id="custom-end-modal">
+                    </span>
+                </div>
+                <button id="export-pdf-modal" class="modal-btn save-btn">Print</button>
+                <button id="cancel-export-modal" class="modal-btn cancel-btn">Cancel</button>
+            </div>
+        </div>
+
+        <div class="main-flex-container">
+            <div class="trip-log-panel">
+                <h2>Trip Log</h2>
+                <ul id="trip-list">
+                </ul>
+            </div>
+        </div>
+
+        <div id="edit-modal" class="modal">
+            <div class="modal-content">
+                <h3>Edit Trip</h3>
+                <label>Date: <span class="required">*</span> <input type="date" id="edit-date"></label><br><br>
+                <label>Start Location: <input type="text" id="edit-start-location"></label><br><br>
+                <label>End Location: <input type="text" id="edit-end-location"></label><br><br>
+                <label>Purpose: <input type="text" id="edit-purpose"></label><br><br>
+                <label>Distance (miles): <span class="required">*</span> <input type="number"
+                        id="edit-distance"></label><br><br>
+                <button id="save-edit" class="modal-btn save-btn">Save</button>
+                <button id="cancel-edit" class="modal-btn cancel-btn">Cancel</button>
+            </div>
+        </div>
+
+        <!-- jsPDF for PDF export -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+        <!-- Main App Script -->
         <script src="script.js"></script>
     </div>
 </body>

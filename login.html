@@ -14,43 +14,40 @@
 
 <body>
     <div id="login-container" class="login-card">
-        <h2 style="text-align:center;">Login</h2>
+        <h2 class="login-title">Login</h2>
         <form id="login-form">
-            <div style="margin-bottom:12px;">
-                <input type="text" id="login-username" placeholder="Email" required style="width:100%;padding:8px;">
+            <div class="login-form-group">
+                <input type="text" id="login-username" placeholder="Email" required class="login-input">
             </div>
-            <div style="margin-bottom:16px;">
-                <input type="password" id="login-password" placeholder="Password" required
-                    style="width:100%;padding:8px;">
+            <div class="login-form-group">
+                <input type="password" id="login-password" placeholder="Password" required class="login-input">
             </div>
-            <button type="submit" style="width:100%;">Login</button>
+            <button type="submit" class="login-btn">Login</button>
         </form>
-        <div style="text-align:center;margin:10px 0;">
-            <button id="show-signup" style="background:none;border:none;color:#2980b9;cursor:pointer;">Sign up</button>
+        <div class="login-links">
+            <button id="show-signup" class="link-btn">Sign up</button>
             |
-            <button id="show-reset" style="background:none;border:none;color:#2980b9;cursor:pointer;">Forgot
-                Password?</button>
+            <button id="show-reset" class="link-btn">Forgot Password?</button>
         </div>
-        <form id="signup-form" style="display:none;">
-            <div style="margin-bottom:12px;">
-                <input type="text" id="signup-email" placeholder="Email" required style="width:100%;padding:8px;">
+        <form id="signup-form" class="signup-form">
+            <div class="login-form-group">
+                <input type="text" id="signup-email" placeholder="Email" required class="login-input">
             </div>
-            <div style="margin-bottom:16px;">
-                <input type="password" id="signup-password" placeholder="Password" required
-                    style="width:100%;padding:8px;">
+            <div class="login-form-group">
+                <input type="password" id="signup-password" placeholder="Password" required class="login-input">
             </div>
-            <button type="submit" style="width:100%;">Sign Up</button>
-            <button type="button" id="cancel-signup" style="width:100%;margin-top:8px;">Cancel</button>
+            <button type="submit" class="login-btn">Sign Up</button>
+            <button type="button" id="cancel-signup" class="login-btn cancel-btn">Cancel</button>
         </form>
-        <form id="reset-form" style="display:none;">
-            <div style="margin-bottom:12px;">
-                <input type="text" id="reset-email" placeholder="Email" required style="width:100%;padding:8px;">
+        <form id="reset-form" class="reset-form">
+            <div class="login-form-group">
+                <input type="text" id="reset-email" placeholder="Email" required class="login-input">
             </div>
-            <button type="submit" style="width:100%;">Send Reset Email</button>
-            <button type="button" id="cancel-reset" style="width:100%;margin-top:8px;">Cancel</button>
+            <button type="submit" class="login-btn">Send Reset Email</button>
+            <button type="button" id="cancel-reset" class="login-btn cancel-btn">Cancel</button>
         </form>
-        <div id="login-error" style="color:#c0392b;text-align:center;margin-top:10px;display:none;"></div>
-        <div id="login-success" style="color:#27ae60;text-align:center;margin-top:10px;display:none;"></div>
+        <div id="login-error" class="login-message error-message"></div>
+        <div id="login-success" class="login-message success-message"></div>
     </div>
     <script src="login.js"></script>
 </body>

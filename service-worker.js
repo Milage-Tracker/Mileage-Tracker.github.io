@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mileage-tracker-cache-v1';
+const CACHE_NAME = 'mileage-tracker-cache-v7';
 const urlsToCache = [
   './',
   './index.html',
@@ -8,32 +8,32 @@ const urlsToCache = [
   // Add paths to your icon files here if you have them, e.g., './icon-192x192.png', './icon-512x512.png'
 ];
 
-self.addEventListener('install', function(event) {
+self.addEventListener('install', function (event) {
   // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(function(cache) {
+      .then(function (cache) {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-self.addEventListener('fetch', function(event) {
+self.addEventListener('fetch', function (event) {
   event.respondWith(
     caches.match(event.request)
-      .then(function(response) {
+      .then(function (response) {
         // Cache hit - return response
         if (response) {
           return response;
         }
         return fetch(event.request);
       }
-    )
+      )
   );
 });
 
-self.addEventListener('activate', function(event) {
+self.addEventListener('activate', function (event) {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
