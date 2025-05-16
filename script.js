@@ -198,6 +198,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // --- FIREBASE AUTH LOGIC END ---
 
+    // Hamburger menu toggle for mobile nav
+    const hamburger = document.getElementById('nav-hamburger');
+    const navLinks = document.getElementById('nav-links');
+
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', function () {
+            const isOpen = navLinks.classList.toggle('open');
+            hamburger.setAttribute('aria-expanded', isOpen);
+        });
+        // Optional: close menu when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!navLinks.contains(e.target) && !hamburger.contains(e.target)) {
+                navLinks.classList.remove('open');
+                hamburger.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
     // --- FIRESTORE TRIP STORAGE START ---
     // Helper: Get Firestore trips collection for current user
     function getTripsCollection() {

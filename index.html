@@ -19,147 +19,115 @@
 </head>
 
 <body>
-    <div id="app-container">
-        <!-- Login Card -->
-        <div id="login-container" class="login-card">
-            <h2 class="login-title">Login</h2>
-            <form id="login-form">
-                <div class="login-form-group">
-                    <input type="text" id="login-username" placeholder="Email" required class="login-input">
-                </div>
-                <div class="login-form-group">
-                    <input type="password" id="login-password" placeholder="Password" required class="login-input">
-                </div>
-                <button type="submit" class="login-btn">Login</button>
-            </form>
-            <div class="login-links">
-                <button id="show-signup" class="link-btn">Sign up</button>
-                |
-                <button id="show-reset" class="link-btn">Forgot Password?</button>
-            </div>
-            <form id="signup-form" class="signup-form">
-                <div class="login-form-group">
-                    <input type="text" id="signup-email" placeholder="Email" required class="login-input">
-                </div>
-                <div class="login-form-group">
-                    <input type="password" id="signup-password" placeholder="Password" required class="login-input">
-                </div>
-                <button type="submit" class="login-btn">Sign Up</button>
-                <button type="button" id="cancel-signup" class="login-btn cancel-btn">Cancel</button>
-            </form>
-            <form id="reset-form" class="reset-form">
-                <div class="login-form-group">
-                    <input type="text" id="reset-email" placeholder="Email" required class="login-input">
-                </div>
-                <button type="submit" class="login-btn">Send Reset Email</button>
-                <button type="button" id="cancel-reset" class="login-btn cancel-btn">Cancel</button>
-            </form>
-            <div id="login-error" class="login-message error-message"></div>
-            <div id="login-success" class="login-message success-message"></div>
-        </div>
-
-        <div class="flex-header">
-            <span id="profile-email" class="profile-email"></span>
+    <nav class="mobile-nav">
+        <span id="profile-email" class="profile-email"></span>
+        <button class="hamburger" id="nav-hamburger" aria-label="Open navigation" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links" id="nav-links">
             <button id="profile-btn" class="profile-btn">Profile</button>
             <button id="logout-btn" class="logout-btn">Logout</button>
         </div>
-        <div id="profile-modal" class="modal">
-            <div class="modal-content profile-modal-content">
-                <h3 class="modal-title">Profile</h3>
-                <div class="modal-section">
-                    <label class="modal-label">Email:</label>
-                    <span id="profile-modal-email"></span>
-                </div>
-                <div class="modal-section">
-                    <label for="profile-password" class="modal-label">New Password:</label>
-                    <input type="password" id="profile-password" class="modal-input">
-                </div>
-                <button id="profile-save" class="modal-btn save-btn">Change Password</button>
-                <button id="profile-close" class="modal-btn cancel-btn">Close</button>
-                <div id="profile-message" class="modal-message"></div>
+    </nav>
+    <div id="profile-modal" class="modal">
+        <div class="modal-content profile-modal-content">
+            <h3 class="modal-title">Profile</h3>
+            <div class="modal-section">
+                <label class="modal-label">Email:</label>
+                <span id="profile-modal-email"></span>
             </div>
-        </div>
-
-        <h1>Mileage Tracker</h1>
-
-        <button id="show-add-trip" class="main-add-trip-btn">Add Trip</button>
-        <button id="show-export-modal" class="main-export-btn">Print Trip Log</button>
-        <div id="add-trip-modal" class="modal">
-            <div class="modal-content">
-                <h3>Add Trip</h3>
-                <form id="add-trip-form">
-                    <label for="date">Date (YYYY-MM-DD): <span class="required">*</span></label>
-                    <input type="date" id="date" required><br><br>
-
-                    <label for="start-location">Start Location:</label>
-                    <input type="text" id="start-location"><br><br>
-
-                    <label for="end-location">End Location:</label>
-                    <input type="text" id="end-location"><br><br>
-
-                    <label for="purpose">Trip Purpose:</label>
-                    <input type="text" id="purpose"><br><br>
-
-                    <label for="distance">Distance (miles): <span class="required">*</span></label>
-                    <input type="number" id="distance" required><br><br>
-
-                    <button type="submit" id="add-trip">Add Trip</button>
-                    <button type="button" id="cancel-add-trip" class="modal-btn cancel-btn">Cancel</button>
-                </form>
+            <div class="modal-section">
+                <label for="profile-password" class="modal-label">New Password:</label>
+                <input type="password" id="profile-password" class="modal-input">
             </div>
+            <button id="profile-save" class="modal-btn save-btn">Change Password</button>
+            <button id="profile-close" class="modal-btn cancel-btn">Close</button>
+            <div id="profile-message" class="modal-message"></div>
         </div>
+    </div>
 
-        <div id="export-modal" class="modal">
-            <div class="modal-content">
-                <h3>Print Trip Log</h3>
-                <div class="export-filters" id="export-filters-modal">
-                    <label for="export-range-modal">Print Range:</label>
-                    <select id="export-range-modal">
-                        <option value="all-time">All Time</option>
-                        <option value="this-month" selected>This Month</option>
-                        <option value="last-month">Last Month</option>
-                        <option value="this-year">This Year</option>
-                        <option value="last-year">Last Year</option>
-                        <option value="custom">Custom Range</option>
-                    </select>
-                    <span id="custom-range-fields-modal" style="display:none">
-                        <label for="custom-start-modal">From:</label>
-                        <input type="date" id="custom-start-modal">
-                        <label for="custom-end-modal">To:</label>
-                        <input type="date" id="custom-end-modal">
-                    </span>
-                </div>
-                <button id="export-pdf-modal" class="modal-btn save-btn">Print</button>
-                <button id="cancel-export-modal" class="modal-btn cancel-btn">Cancel</button>
+    <h1>Mileage Tracker</h1>
+
+    <button id="show-add-trip" class="main-add-trip-btn">Add Trip</button>
+    <button id="show-export-modal" class="main-export-btn">Print Trip Log</button>
+    <div id="add-trip-modal" class="modal">
+        <div class="modal-content">
+            <h3>Add Trip</h3>
+            <form id="add-trip-form">
+                <label for="date">Date (YYYY-MM-DD): <span class="required">*</span></label>
+                <input type="date" id="date" required><br><br>
+
+                <label for="start-location">Start Location:</label>
+                <input type="text" id="start-location"><br><br>
+
+                <label for="end-location">End Location:</label>
+                <input type="text" id="end-location"><br><br>
+
+                <label for="purpose">Trip Purpose:</label>
+                <input type="text" id="purpose"><br><br>
+
+                <label for="distance">Distance (miles): <span class="required">*</span></label>
+                <input type="number" id="distance" required><br><br>
+
+                <button type="submit" id="add-trip">Add Trip</button>
+                <button type="button" id="cancel-add-trip" class="modal-btn cancel-btn">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <h3>Print Trip Log</h3>
+            <div class="export-filters" id="export-filters-modal">
+                <label for="export-range-modal">Print Range:</label>
+                <select id="export-range-modal">
+                    <option value="all-time">All Time</option>
+                    <option value="this-month" selected>This Month</option>
+                    <option value="last-month">Last Month</option>
+                    <option value="this-year">This Year</option>
+                    <option value="last-year">Last Year</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+                <span id="custom-range-fields-modal" style="display:none">
+                    <label for="custom-start-modal">From:</label>
+                    <input type="date" id="custom-start-modal">
+                    <label for="custom-end-modal">To:</label>
+                    <input type="date" id="custom-end-modal">
+                </span>
             </div>
+            <button id="export-pdf-modal" class="modal-btn save-btn">Print</button>
+            <button id="cancel-export-modal" class="modal-btn cancel-btn">Cancel</button>
         </div>
+    </div>
 
-        <div class="main-flex-container">
-            <div class="trip-log-panel">
-                <h2>Trip Log</h2>
-                <ul id="trip-list">
-                </ul>
-            </div>
+    <div class="main-flex-container">
+        <div class="trip-log-panel">
+            <h2>Trip Log</h2>
+            <ul id="trip-list">
+            </ul>
         </div>
+    </div>
 
-        <div id="edit-modal" class="modal">
-            <div class="modal-content">
-                <h3>Edit Trip</h3>
-                <label>Date: <span class="required">*</span> <input type="date" id="edit-date"></label><br><br>
-                <label>Start Location: <input type="text" id="edit-start-location"></label><br><br>
-                <label>End Location: <input type="text" id="edit-end-location"></label><br><br>
-                <label>Purpose: <input type="text" id="edit-purpose"></label><br><br>
-                <label>Distance (miles): <span class="required">*</span> <input type="number"
-                        id="edit-distance"></label><br><br>
-                <button id="save-edit" class="modal-btn save-btn">Save</button>
-                <button id="cancel-edit" class="modal-btn cancel-btn">Cancel</button>
-            </div>
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Trip</h3>
+            <label>Date: <span class="required">*</span> <input type="date" id="edit-date"></label><br><br>
+            <label>Start Location: <input type="text" id="edit-start-location"></label><br><br>
+            <label>End Location: <input type="text" id="edit-end-location"></label><br><br>
+            <label>Purpose: <input type="text" id="edit-purpose"></label><br><br>
+            <label>Distance (miles): <span class="required">*</span> <input type="number"
+                    id="edit-distance"></label><br><br>
+            <button id="save-edit" class="modal-btn save-btn">Save</button>
+            <button id="cancel-edit" class="modal-btn cancel-btn">Cancel</button>
         </div>
+    </div>
 
-        <!-- jsPDF for PDF export -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <!-- Main App Script -->
-        <script src="script.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Main App Script -->
+    <script src="script.js"></script>
     </div>
 </body>
 

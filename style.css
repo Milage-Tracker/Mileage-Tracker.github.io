@@ -1128,3 +1128,120 @@ h2 {
         max-width: 99vw;
     }
 }
+
+/* Mobile Navigation */
+.mobile-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.mobile-nav .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mobile-nav .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.5rem;
+}
+
+.mobile-nav .hamburger span {
+    display: block;
+    width: 24px;
+    height: 3px;
+    margin: 4px 0;
+    background: #333;
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+.mobile-nav .profile-btn,
+.mobile-nav .logout-btn {
+    width: auto;
+    min-width: 90px;
+    padding: 0.5rem 1.2rem;
+    margin: 0 0.25rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+
+    .mobile-nav .profile-btn,
+    .mobile-nav .logout-btn {
+        width: 100%;
+        min-width: 0;
+        margin: 0.2rem 0;
+        font-size: 1rem;
+        padding: 0.7rem 0;
+        border-radius: 6px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .mobile-nav {
+        flex-direction: row;
+        align-items: center;
+        padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+    }
+
+    .mobile-nav .profile-email {
+        max-width: 100px;
+        text-align: left;
+        font-size: 0.9rem;
+    }
+
+    .mobile-nav .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        right: 0;
+        background: #fff;
+        width: 180px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        border-radius: 0 0 8px 8px;
+        z-index: 2000;
+        padding: 0.5rem 0;
+    }
+
+    .mobile-nav .nav-links.open {
+        display: flex;
+    }
+
+    .mobile-nav .hamburger {
+        display: flex;
+    }
+
+    .mobile-nav .profile-btn,
+    .mobile-nav .logout-btn {
+        width: 100%;
+        margin: 0.2rem 0;
+        font-size: 1rem;
+    }
+}
