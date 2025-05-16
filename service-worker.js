@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mileage-tracker-cache-v8';
+const CACHE_NAME = 'mileage-tracker-cache-v10';
 const urlsToCache = [
   './',
   './index.html',
@@ -8,42 +8,36 @@ const urlsToCache = [
   // Add paths to your icon files here if you have them, e.g., './icon-192x192.png', './icon-512x512.png'
 ];
 
-self.addEventListener('install', function (event) {
-  // Perform install steps
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function (cache) {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
+  self.skipWaiting();
 });
 
-self.addEventListener('fetch', function (event) {
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request)
-      .then(function (response) {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-      )
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request).then(fetchRes => {
+        // Optionally cache new requests here
+        return fetchRes;
+      });
+    })
   );
 });
 
-self.addEventListener('activate', function (event) {
-  const cacheWhitelist = [CACHE_NAME];
+self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          if (cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
+  self.clients.claim();
 });
