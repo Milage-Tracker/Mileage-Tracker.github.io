@@ -17,13 +17,42 @@
 
 <body>
     <div id="app-container">
-        <!-- Google Sign-In Button -->
-        <div id="google-signin-container" class="login-card" style="max-width:400px; margin:40px auto 24px auto;">
-            <button id="google-signin-btn" class="login-btn"
-                style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; font-size:1.1em;">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
-                    style="width:22px; height:22px; vertical-align:middle;"> Login with Google
-            </button>
+        <!-- Login Card -->
+        <div id="login-container" class="login-card">
+            <h2 class="login-title">Login</h2>
+            <form id="login-form">
+                <div class="login-form-group">
+                    <input type="text" id="login-username" placeholder="Email" required class="login-input">
+                </div>
+                <div class="login-form-group">
+                    <input type="password" id="login-password" placeholder="Password" required class="login-input">
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+            <div class="login-links">
+                <button id="show-signup" class="link-btn">Sign up</button>
+                |
+                <button id="show-reset" class="link-btn">Forgot Password?</button>
+            </div>
+            <form id="signup-form" class="signup-form">
+                <div class="login-form-group">
+                    <input type="text" id="signup-email" placeholder="Email" required class="login-input">
+                </div>
+                <div class="login-form-group">
+                    <input type="password" id="signup-password" placeholder="Password" required class="login-input">
+                </div>
+                <button type="submit" class="login-btn">Sign Up</button>
+                <button type="button" id="cancel-signup" class="login-btn cancel-btn">Cancel</button>
+            </form>
+            <form id="reset-form" class="reset-form">
+                <div class="login-form-group">
+                    <input type="text" id="reset-email" placeholder="Email" required class="login-input">
+                </div>
+                <button type="submit" class="login-btn">Send Reset Email</button>
+                <button type="button" id="cancel-reset" class="login-btn cancel-btn">Cancel</button>
+            </form>
+            <div id="login-error" class="login-message error-message"></div>
+            <div id="login-success" class="login-message success-message"></div>
         </div>
 
         <div class="flex-header">
