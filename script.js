@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const tripList = document.getElementById('trip-list');
 
     // --- FIREBASE AUTH LOGIC START ---
-    // Your Firebase config object (replace with your own from Firebase Console)
     const firebaseConfig = {
         apiKey: "AIzaSyClCS--vMtgqiAJ5I4DOoo_7ZofzgygF3w",
         authDomain: "milage-tracker-aeb71.firebaseapp.com",
@@ -64,18 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Only one auth state listener
-    auth.onAuthStateChanged(user => {
-        if (!user) {
-            window.location.href = 'login.html';
-        } else {
-            updateProfileUI();
-        }
-    });
-
     // Profile/Logout logic
     const logoutBtn = document.getElementById('logout-btn');
-    const profileBtn = document.getElementById('profile-btn');
     const profileModal = document.getElementById('profile-modal');
     const profileClose = document.getElementById('profile-close');
     const profileSave = document.getElementById('profile-save');
@@ -98,13 +87,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    if (profileBtn && profileModal && profilePassword && profileMessage) {
-        profileBtn.addEventListener('click', () => {
-            updateProfileUI();
-            profileModal.style.display = 'flex';
-            profilePassword.value = '';
-            profileMessage.textContent = '';
-        });
+    if (profileModal && profilePassword && profileMessage) {
+        const profileBtn = document.getElementById('profile-btn');
+        if (profileBtn) {
+            profileBtn.addEventListener('click', () => {
+                updateProfileUI();
+                profileModal.style.display = 'flex';
+                profilePassword.value = '';
+                profileMessage.textContent = '';
+            });
+        }
     }
     if (profileClose && profileModal) {
         profileClose.addEventListener('click', () => {
@@ -181,21 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    // --- GOOGLE SIGN-IN LOGIC ---
-    const googleSignInBtn = document.getElementById('google-signin-btn');
-    if (googleSignInBtn) {
-        googleSignInBtn.addEventListener('click', function () {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    // User signed in, reload to update UI
-                    window.location.reload();
-                })
-                .catch((error) => {
-                    alert('Google sign-in failed: ' + (error.message || error));
-                });
-        });
-    }
     // --- FIREBASE AUTH LOGIC END ---
 
     // Hamburger menu toggle for mobile nav
@@ -214,6 +191,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 hamburger.setAttribute('aria-expanded', 'false');
             }
         });
+    }
+
+    // --- LOCAL STORAGE TRIP LOGIC ---
+    function getLocalTrips() {
+        const local = localStorage.getItem('localTrips');
+        return local ? JSON.parse(local) : [];
+    }
+    function saveLocalTrips(trips) {
+        localStorage.setItem('localTrips', JSON.stringify(trips));
+    }
+    function addTripToLocal(trip) {
+        const trips = getLocalTrips();
+        trips.push(trip);
+        saveLocalTrips(trips);
+    }
+    function clearLocalTrips() {
+        localStorage.removeItem('localTrips');
     }
 
     // --- FIRESTORE TRIP STORAGE START ---
@@ -255,13 +249,76 @@ document.addEventListener('DOMContentLoaded', () => {
     let trips = [];
     let currentEditIndex = null;
 
-    // Wait for auth before loading trips
-    auth.onAuthStateChanged(async user => {
-        if (user) {
-            trips = await loadTripsFromFirestore();
-            renderTrips();
+    // On login, merge local trips into Firestore
+    async function mergeLocalTripsToFirestore() {
+        const localTrips = getLocalTrips();
+        if (localTrips.length && auth.currentUser) {
+            for (const trip of localTrips) {
+                await addTripToFirestore(trip);
+            }
+            clearLocalTrips();
         }
+    }
+
+    // Wait for auth before loading trips
+    // Modified: also load from localStorage if logged out
+    async function loadTripsForCurrentState() {
+        if (auth.currentUser) {
+            await mergeLocalTripsToFirestore();
+            return await loadTripsFromFirestore();
+        } else {
+            return getLocalTrips();
+        }
+    }
+
+    const authBtn = document.getElementById('auth-btn');
+    const localStorageMessage = document.getElementById('local-storage-message');
+    const loginSignupLink = document.getElementById('login-signup-link');
+
+    function updateAuthUI(user) {
+        // Always re-query the profileBtn in case DOM changed
+        const profileBtn = document.getElementById('profile-btn');
+        if (authBtn) {
+            if (user) {
+                authBtn.textContent = 'Logout';
+                authBtn.classList.remove('login-btn');
+                authBtn.classList.add('logout-btn');
+                authBtn.onclick = async () => {
+                    await auth.signOut();
+                    updateAuthUI(null);
+                    if (profileModal) profileModal.style.display = 'none';
+                };
+                if (profileBtn) profileBtn.style.display = 'inline-block';
+            } else {
+                authBtn.textContent = 'Login / Sign Up';
+                authBtn.classList.remove('logout-btn');
+                authBtn.classList.add('login-btn');
+                authBtn.onclick = () => {
+                    window.location.href = 'login.html';
+                };
+                if (profileBtn) profileBtn.style.display = 'none';
+            }
+        }
+        if (localStorageMessage) {
+            localStorageMessage.style.display = user ? 'none' : '';
+        }
+    }
+
+    auth.onAuthStateChanged(async user => {
+        updateAuthUI(user);
+        if (user) {
+            updateProfileUI();
+        }
+        trips = await loadTripsForCurrentState();
+        renderTrips();
     });
+
+    if (loginSignupLink) {
+        loginSignupLink.onclick = (e) => {
+            e.preventDefault();
+            window.location.href = 'login.html';
+        };
+    }
 
     async function renderTrips() {
         if (!tripList) return;
@@ -394,17 +451,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function toggleInlineEdit(index, listItem) {
-        // Remove any existing inline editor
-        const existing = document.getElementById('inline-edit-form');
-        if (existing) existing.remove();
-        if (currentEditIndex === index) {
-            currentEditIndex = null;
-            return;
-        }
-        currentEditIndex = index;
         const trip = trips[index];
         const form = document.createElement('form');
-        form.id = 'inline-edit-form';
         form.className = 'inline-edit-form';
         form.innerHTML = `
             <div class="inline-edit-fields">
@@ -419,6 +467,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button type="button" id="inline-cancel">Cancel</button>
             </div>
         `;
+        listItem.innerHTML = '';
+        listItem.appendChild(form);
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const updatedTrip = {
@@ -432,23 +482,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Please enter a valid date and distance.');
                 return;
             }
-            await updateTripInFirestore(trip.id, updatedTrip);
-            trips = await loadTripsFromFirestore();
+            if (auth.currentUser) {
+                await updateTripInFirestore(trip.id, updatedTrip);
+                trips = await loadTripsFromFirestore();
+            } else {
+                const localTrips = getLocalTrips();
+                localTrips[index] = updatedTrip;
+                saveLocalTrips(localTrips);
+                trips = localTrips;
+            }
             renderTrips();
-            currentEditIndex = null;
         });
         form.querySelector('#inline-cancel').addEventListener('click', () => {
-            form.remove();
-            currentEditIndex = null;
+            renderTrips();
         });
-        listItem.insertAdjacentElement('afterend', form);
     }
 
     async function deleteTrip(index) {
         const trip = trips[index];
         if (!confirm('Are you sure you want to delete this trip?')) return;
-        await deleteTripFromFirestore(trip.id);
-        trips = await loadTripsFromFirestore();
+        if (auth.currentUser) {
+            await deleteTripFromFirestore(trip.id);
+            trips = await loadTripsFromFirestore();
+        } else {
+            const localTrips = getLocalTrips();
+            localTrips.splice(index, 1);
+            saveLocalTrips(localTrips);
+            trips = localTrips;
+        }
         renderTrips();
     }
 
@@ -472,8 +533,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === addTripModal) closeAddTripModal();
         });
     }
-
-    // Replace addTripButton logic to use modal form
     if (addTripForm) {
         addTripForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -493,439 +552,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 purpose,
                 distance
             };
-            await addTripToFirestore(newTrip);
-            trips = await loadTripsFromFirestore();
+            if (auth.currentUser) {
+                await addTripToFirestore(newTrip);
+                trips = await loadTripsFromFirestore();
+            } else {
+                addTripToLocal(newTrip);
+                trips = getLocalTrips();
+            }
             renderTrips();
             closeAddTripModal();
         });
     }
 
-    // PDF Export logic
-    function addExportPdfButton() {
-        if (document.getElementById('export-pdf')) return;
-        const btn = document.createElement('button');
-        btn.id = 'export-pdf';
-        btn.textContent = 'Export Trips to PDF';
-        btn.addEventListener('click', exportTripsToPdf);
-        const filters = document.getElementById('export-filters');
-        if (filters && filters.parentNode) filters.parentNode.insertBefore(btn, filters.nextSibling);
-    }
-
-    // --- Export Range Logic ---
-    const exportRange = document.getElementById('export-range');
-    const customRangeFields = document.getElementById('custom-range-fields');
-    if (exportRange && customRangeFields) {
-        exportRange.addEventListener('change', function () {
-            if (this.value === 'custom') {
-                customRangeFields.style.display = '';
-            } else {
-                customRangeFields.style.display = 'none';
-            }
-        });
-    }
-
-    function getExportDateRange() {
-        const now = new Date();
-        let start, end;
-        switch ((exportRange && exportRange.value) || 'this-month') {
-            case 'this-month':
-                start = new Date(now.getFullYear(), now.getMonth(), 1);
-                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                break;
-            case 'last-month':
-                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                end = new Date(now.getFullYear(), now.getMonth(), 0);
-                break;
-            case 'this-year':
-                start = new Date(now.getFullYear(), 0, 1);
-                end = new Date(now.getFullYear(), 11, 31);
-                break;
-            case 'last-year':
-                start = new Date(now.getFullYear() - 1, 0, 1);
-                end = new Date(now.getFullYear() - 1, 11, 31);
-                break;
-            case 'custom':
-                const s = document.getElementById('custom-start').value;
-                const e = document.getElementById('custom-end').value;
-                if (s && e) {
-                    start = new Date(s);
-                    end = new Date(e);
-                }
-                break;
-            default:
-                start = new Date(now.getFullYear(), now.getMonth(), 1);
-                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        }
-        // Set time to cover whole days
-        if (start) start.setHours(0, 0, 0, 0);
-        if (end) end.setHours(23, 59, 59, 999);
-        return { start, end };
-    }
-
-    function filterTripsByDate(trips, range) {
-        if (!range.start || !range.end) return trips;
-        return trips.filter(trip => {
-            const d = new Date(trip.date);
-            return d >= range.start && d <= range.end;
-        });
-    }
-
-    function getExportHeading(rangeType, range) {
-        const now = new Date();
-        switch (rangeType) {
-            case 'this-month':
-                return `Miles Driven Log\nThis Month (${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()})`;
-            case 'last-month': {
-                const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                return `Miles Driven Log\nLast Month (${lastMonth.toLocaleString('default', { month: 'long' })} ${lastMonth.getFullYear()})`;
-            }
-            case 'this-year':
-                return `Miles Driven Log\nThis Year (${now.getFullYear()})`;
-            case 'last-year':
-                return `Miles Driven Log\nLast Year (${now.getFullYear() - 1})`;
-            case 'custom':
-                if (range.start && range.end) {
-                    return `Miles Driven Log\n${range.start.toLocaleDateString()} to ${range.end.toLocaleDateString()}`;
-                }
-                return 'Miles Driven Log\nCustom Range';
-            default:
-                return 'Miles Driven Log';
-        }
-    }
-
-    function getPrintFilename(rangeType, range) {
-        const now = new Date();
-        switch (rangeType) {
-            case 'this-month':
-                return `MilesDriven_${now.toLocaleString('default', { month: 'long' })}_${now.getFullYear()}`;
-            case 'last-month': {
-                const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                return `MilesDriven_${lastMonth.toLocaleString('default', { month: 'long' })}_${lastMonth.getFullYear()}`;
-            }
-            case 'this-year':
-                return `MilesDriven_${now.getFullYear()}`;
-            case 'last-year':
-                return `MilesDriven_${now.getFullYear() - 1}`;
-            case 'all-time':
-                return 'MilesDriven_All_Time';
-            case 'custom':
-                if (range.start && range.end) {
-                    // Use the original input values to avoid timezone shift
-                    const s = document.getElementById('custom-start-modal').value;
-                    const e = document.getElementById('custom-end-modal').value;
-                    if (s && e) {
-                        return `MilesDriven_${s.replace(/-/g, '_')}_to_${e.replace(/-/g, '_')}`;
-                    }
-                }
-                return 'MilesDriven_Custom_Range';
-            default:
-                return 'MilesDriven';
-        }
-    }
-
-    async function exportTripsToPdf() {
-        if (!trips.length) {
-            alert('No trips to export.');
-            return;
-        }
-        const rangeType = (exportRange && exportRange.value) || 'this-month';
-        const range = getExportDateRange();
-        const filteredTrips = filterTripsByDate(trips, range);
-        if (!filteredTrips.length) {
-            alert('No trips found for the selected range.');
-            return;
-        }
-        // Group filtered trips by year and month for export
-        const grouped = {};
-        filteredTrips.forEach(trip => {
-            const [year, month] = trip.date.split('-');
-            if (!grouped[year]) grouped[year] = {};
-            if (!grouped[year][month]) grouped[year][month] = [];
-            grouped[year][month].push(trip);
-        });
-        // Build PDF content with styled tables
-        const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
-        let y = 40;
-        doc.setFontSize(20);
-        doc.setTextColor('#21618c');
-        doc.text(getExportHeading(rangeType, range), 40, y);
-        y += 50; // Increased from 30 to 50 for more space below heading
-        Object.keys(grouped).sort((a, b) => b - a).forEach(year => {
-            doc.setFontSize(16);
-            doc.setTextColor('#2980b9');
-            doc.text(year, 40, y);
-            y += 22;
-            Object.keys(grouped[year]).sort((a, b) => b - a).forEach(month => {
-                const monthNum = parseInt(month, 10);
-                const monthName = new Date(year, monthNum - 1, 1).toLocaleString('default', { month: 'long' });
-                doc.setFontSize(14);
-                doc.setTextColor('#2980b9');
-                doc.text('  ' + monthName, 50, y);
-                y += 18;
-                // Table headers with blue background
-                doc.setFontSize(11);
-                doc.setTextColor('#fff');
-                doc.setFillColor(41, 128, 185); // #2980b9
-                const headers = ['Date', 'Distance', 'From', 'To', 'Purpose'];
-                let x = 60;
-                let colWidths = [70, 60, 100, 100, 140];
-                let headerHeight = 18;
-                doc.rect(x - 2, y - headerHeight + 4, colWidths.reduce((a, b) => a + b, 0) + 8, headerHeight, 'F');
-                headers.forEach((h, i) => {
-                    doc.text(h, x + 4, y);
-                    x += colWidths[i];
-                });
-                y += headerHeight;
-                // Table rows with alternating background
-                grouped[year][month].forEach((trip, idx) => {
-                    x = 60;
-                    const row = [
-                        trip.date,
-                        trip.distance + ' mi',
-                        trip.startLocation || '',
-                        trip.endLocation || '',
-                        trip.purpose || ''
-                    ];
-                    // Alternate row color
-                    if (idx % 2 === 0) {
-                        doc.setFillColor(234, 243, 250); // #eaf3fa
-                        doc.rect(x - 2, y - 12, colWidths.reduce((a, b) => a + b, 0) + 8, 16, 'F');
-                    }
-                    doc.setTextColor('#222');
-                    row.forEach((cell, i) => {
-                        doc.text(String(cell), x + 4, y);
-                        x += colWidths[i];
-                    });
-                    y += 16;
-                    if (y > 780) {
-                        doc.addPage();
-                        y = 40;
-                    }
-                });
-                y += 10;
-            });
-            y += 8;
-        });
-        doc.save(getPrintFilename(rangeType, range) + '.pdf');
-    }
-
-    // Export PDF Modal logic
-    const showExportModalBtn = document.getElementById('show-export-modal');
-    const exportModal = document.getElementById('export-modal');
-    const exportPdfModalBtn = document.getElementById('export-pdf-modal');
-    const cancelExportModalBtn = document.getElementById('cancel-export-modal');
-    const exportRangeModal = document.getElementById('export-range-modal');
-    const customRangeFieldsModal = document.getElementById('custom-range-fields-modal');
-    const customStartModal = document.getElementById('custom-start-modal');
-    const customEndModal = document.getElementById('custom-end-modal');
-
-    function openExportModal() {
-        if (exportModal) exportModal.style.display = 'flex';
-        if (exportRangeModal) exportRangeModal.value = 'this-month';
-        if (customRangeFieldsModal) customRangeFieldsModal.style.display = 'none';
-    }
-    function closeExportModal() {
-        if (exportModal) exportModal.style.display = 'none';
-        if (customStartModal) customStartModal.value = '';
-        if (customEndModal) customEndModal.value = '';
-    }
-    if (showExportModalBtn) showExportModalBtn.addEventListener('click', openExportModal);
-    if (cancelExportModalBtn) cancelExportModalBtn.addEventListener('click', closeExportModal);
-    if (exportModal) {
-        exportModal.addEventListener('click', (e) => {
-            if (e.target === exportModal) closeExportModal();
-        });
-    }
-    if (exportRangeModal && customRangeFieldsModal) {
-        exportRangeModal.addEventListener('change', function () {
-            if (this.value === 'custom') {
-                customRangeFieldsModal.style.display = '';
-            } else {
-                customRangeFieldsModal.style.display = 'none';
-            }
-        });
-    }
-
-    function getExportDateRangeModal() {
-        const now = new Date();
-        let start, end;
-        switch ((exportRangeModal && exportRangeModal.value) || 'this-month') {
-            case 'this-month':
-                start = new Date(now.getFullYear(), now.getMonth(), 1);
-                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                break;
-            case 'last-month':
-                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                end = new Date(now.getFullYear(), now.getMonth(), 0);
-                break;
-            case 'this-year':
-                start = new Date(now.getFullYear(), 0, 1);
-                end = new Date(now.getFullYear(), 11, 31);
-                break;
-            case 'last-year':
-                start = new Date(now.getFullYear() - 1, 0, 1);
-                end = new Date(now.getFullYear() - 1, 11, 31);
-                break;
-            case 'all-time':
-                start = null;
-                end = null;
-                break;
-            case 'custom':
-                const s = customStartModal && customStartModal.value;
-                const e = customEndModal && customEndModal.value;
-                if (s && e) {
-                    start = new Date(s);
-                    end = new Date(e);
-                }
-                break;
-            default:
-                start = new Date(now.getFullYear(), now.getMonth(), 1);
-                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        }
-        if (start) start.setHours(0, 0, 0, 0);
-        if (end) end.setHours(23, 59, 59, 999);
-        return { start, end };
-    }
-
-    function filterTripsByDateModal(trips, range) {
-        if (!range.start || !range.end) return trips;
-        return trips.filter(trip => {
-            const d = new Date(trip.date);
-            return d >= range.start && d <= range.end;
-        });
-    }
-
-    function getExportHeadingModal(rangeType, range) {
-        const now = new Date();
-        switch (rangeType) {
-            case 'this-month':
-                return `Miles Driven Log\nThis Month (${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()})`;
-            case 'last-month': {
-                const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                return `Miles Driven Log\nLast Month (${lastMonth.toLocaleString('default', { month: 'long' })} ${lastMonth.getFullYear()})`;
-            }
-            case 'this-year':
-                return `Miles Driven Log\nThis Year (${now.getFullYear()})`;
-            case 'last-year':
-                return `Miles Driven Log\nLast Year (${now.getFullYear() - 1})`;
-            case 'all-time':
-                return 'Miles Driven Log\nAll Time';
-            case 'custom':
-                if (range.start && range.end) {
-                    // Use the original input values to avoid timezone shift
-                    const s = document.getElementById('custom-start-modal').value;
-                    const e = document.getElementById('custom-end-modal').value;
-                    if (s && e) {
-                        return `Miles Driven Log\n${s} to ${e}`;
-                    }
-                }
-                return 'Miles Driven Log\nCustom Range';
-            default:
-                return 'Miles Driven Log';
-        }
-    }
-
-    if (exportPdfModalBtn) {
-        exportPdfModalBtn.addEventListener('click', async () => {
-            if (!trips.length) {
-                alert('No trips to export.');
-                return;
-            }
-            const rangeType = (exportRangeModal && exportRangeModal.value) || 'this-month';
-            const range = getExportDateRangeModal();
-            const filteredTrips = filterTripsByDateModal(trips, range);
-            if (!filteredTrips.length) {
-                alert('No trips found for the selected range.');
-                return;
-            }
-            // Group filtered trips by year and month for export
-            const grouped = {};
-            filteredTrips.forEach(trip => {
-                const [year, month] = trip.date.split('-');
-                if (!grouped[year]) grouped[year] = {};
-                if (!grouped[year][month]) grouped[year][month] = [];
-                grouped[year][month].push(trip);
-            });
-            // Build PDF content with styled tables
-            const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
-            let y = 40;
-            doc.setFontSize(20);
-            doc.setTextColor('#21618c');
-            doc.text(getExportHeadingModal(rangeType, range), 40, y);
-            y += 50;
-            Object.keys(grouped).sort((a, b) => b - a).forEach(year => {
-                doc.setFontSize(16);
-                doc.setTextColor('#2980b9');
-                doc.text(year, 40, y);
-                y += 22;
-                Object.keys(grouped[year]).sort((a, b) => b - a).forEach(month => {
-                    const monthNum = parseInt(month, 10);
-                    const monthName = new Date(year, monthNum - 1, 1).toLocaleString('default', { month: 'long' });
-                    doc.setFontSize(14);
-                    doc.setTextColor('#2980b9');
-                    doc.text('  ' + monthName, 50, y);
-                    y += 18;
-                    // Table headers with blue background
-                    doc.setFontSize(11);
-                    doc.setTextColor('#fff');
-                    doc.setFillColor(41, 128, 185); // #2980b9
-                    const headers = ['Date', 'Distance', 'From', 'To', 'Purpose'];
-                    let x = 60;
-                    let colWidths = [70, 60, 100, 100, 140];
-                    let headerHeight = 18;
-                    doc.rect(x - 2, y - headerHeight + 4, colWidths.reduce((a, b) => a + b, 0) + 8, headerHeight, 'F');
-                    headers.forEach((h, i) => {
-                        doc.text(h, x + 4, y);
-                        x += colWidths[i];
-                    });
-                    y += headerHeight;
-                    // Table rows with alternating background
-                    grouped[year][month].forEach((trip, idx) => {
-                        x = 60;
-                        const row = [
-                            trip.date,
-                            trip.distance + ' mi',
-                            trip.startLocation || '',
-                            trip.endLocation || '',
-                            trip.purpose || ''
-                        ];
-                        // Alternate row color
-                        if (idx % 2 === 0) {
-                            doc.setFillColor(234, 243, 250); // #eaf3fa
-                            doc.rect(x - 2, y - 12, colWidths.reduce((a, b) => a + b, 0) + 8, 16, 'F');
-                        }
-                        doc.setTextColor('#222');
-                        row.forEach((cell, i) => {
-                            doc.text(String(cell), x + 4, y);
-                            x += colWidths[i];
-                        });
-                        y += 16;
-                        if (y > 780) {
-                            doc.addPage();
-                            y = 40;
-                        }
-                    });
-                    y += 10;
-                });
-                y += 8;
-            });
-            doc.save(getPrintFilename(rangeType, range) + '.pdf');
-            closeExportModal();
-        });
-    }
-
     addExportPdfButton();
 });
-
-// Service worker registration (relative path)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-            .then(registration => {
-                console.log('Service worker registered:', registration);
-            })
-            .catch(error => {
-                console.log('Service worker registration failed:', error);
-            });
-    });
-}

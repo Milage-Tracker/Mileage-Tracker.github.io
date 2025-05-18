@@ -5,10 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mileage Tracker</title>
-    <meta name="theme-color" content="#007bff">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <!-- Firebase App (core) -->
     <script src="https://www.gstatic.com/firebasejs/11.7.3/firebase-app-compat.js" defer></script>
@@ -27,10 +23,17 @@
             <span></span>
         </button>
         <div class="nav-links" id="nav-links">
-            <button id="profile-btn" class="profile-btn">Profile</button>
-            <button id="logout-btn" class="logout-btn">Logout</button>
+            <button id="profile-btn" class="profile-btn" style="display:none">Profile</button>
+            <button id="auth-btn" class="auth-btn">Logout</button>
         </div>
     </nav>
+    <div id="local-storage-message"
+        style="display:none; margin: 1em 0; color: #444; background: #fffbe6; border: 1px solid #ffe58f; padding: 1em; border-radius: 6px;">
+        <strong>Not logged in:</strong> Your trips are saved only on this device. <br>
+        <span>To keep your data safe and sync across devices, <a href="#" id="login-signup-link">log in or sign
+                up</a>.</span>
+    </div>
+
     <div id="profile-modal" class="modal">
         <div class="modal-content profile-modal-content">
             <h3 class="modal-title">Profile</h3>
@@ -128,7 +131,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Main App Script -->
     <script src="script.js"></script>
-    </div>
 </body>
 
 </html>
