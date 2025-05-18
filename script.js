@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Delete Firebase Auth account
                 await user.delete();
                 alert('Account deleted.');
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             } catch (err) {
                 if (err.code === 'auth/requires-recent-login') {
                     profileMessage.textContent = 'Please log out and log in again before deleting your account.';
