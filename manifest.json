@@ -1,9 +1,0 @@
-{
-  "name": "Mileage Tracker",
-  "short_name": "Miles",
-  "description": "A simple app to track your business mileage.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#007bff"
-}
