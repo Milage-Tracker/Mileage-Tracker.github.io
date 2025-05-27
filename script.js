@@ -775,31 +775,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Export PDF Modal logic
     const showExportModalBtn = document.getElementById('show-export-modal');
-    const exportModal = document.getElementById('export-modal');
-    const exportPdfModalBtn = document.getElementById('export-pdf-modal');
-    const cancelExportModalBtn = document.getElementById('cancel-export-modal');
+    const exportModal = new bootstrap.Modal(document.getElementById('export-modal'));
     const exportRangeModal = document.getElementById('export-range-modal');
     const customRangeFieldsModal = document.getElementById('custom-range-fields-modal');
     const customStartModal = document.getElementById('custom-start-modal');
     const customEndModal = document.getElementById('custom-end-modal');
+    const exportPdfModalBtn = document.getElementById('export-pdf-modal');
 
     function openExportModal() {
-        if (exportModal) exportModal.style.display = 'flex';
+        exportModal.show();
         if (exportRangeModal) exportRangeModal.value = 'this-month';
         if (customRangeFieldsModal) customRangeFieldsModal.style.display = 'none';
     }
     function closeExportModal() {
-        if (exportModal) exportModal.style.display = 'none';
+        exportModal.hide();
         if (customStartModal) customStartModal.value = '';
         if (customEndModal) customEndModal.value = '';
     }
     if (showExportModalBtn) showExportModalBtn.addEventListener('click', openExportModal);
-    if (cancelExportModalBtn) cancelExportModalBtn.addEventListener('click', closeExportModal);
-    if (exportModal) {
-        exportModal.addEventListener('click', (e) => {
-            if (e.target === exportModal) closeExportModal();
-        });
-    }
+
     if (exportRangeModal && customRangeFieldsModal) {
         exportRangeModal.addEventListener('change', function () {
             if (this.value === 'custom') {

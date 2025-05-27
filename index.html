@@ -61,7 +61,7 @@
 
     <!-- Updated Add Trip Modal to Bootstrap Modal -->
     <div class="modal fade" id="addTripModal" tabindex="-1" aria-labelledby="addTripModalLabel">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addTripModalLabel">Add Trip</h5>
@@ -101,28 +101,38 @@
         </div>
     </div>
 
-    <div id="export-modal" class="modal">
-        <div class="modal-content">
-            <h3>Print Trip Log</h3>
-            <div class="export-filters" id="export-filters-modal">
-                <label for="export-range-modal">Print Range:</label>
-                <select id="export-range-modal">
-                    <option value="all-time">All Time</option>
-                    <option value="this-month" selected>This Month</option>
-                    <option value="last-month">Last Month</option>
-                    <option value="this-year">This Year</option>
-                    <option value="last-year">Last Year</option>
-                    <option value="custom">Custom Range</option>
-                </select>
-                <span id="custom-range-fields-modal" style="display:none">
-                    <label for="custom-start-modal">From:</label>
-                    <input type="date" id="custom-start-modal">
-                    <label for="custom-end-modal">To:</label>
-                    <input type="date" id="custom-end-modal">
-                </span>
+    <!-- Updated Print Trip Log Modal to Bootstrap Modal -->
+    <div class="modal fade" id="export-modal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportModalLabel">Print Trip Log</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="export-filters" id="export-filters-modal">
+                        <label for="export-range-modal" class="form-label">Print Range:</label>
+                        <select id="export-range-modal" class="form-select">
+                            <option value="all-time">All Time</option>
+                            <option value="this-month" selected>This Month</option>
+                            <option value="last-month">Last Month</option>
+                            <option value="this-year">This Year</option>
+                            <option value="last-year">Last Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                        <div id="custom-range-fields-modal" style="display:none; margin-top: 1rem;">
+                            <label for="custom-start-modal" class="form-label">From:</label>
+                            <input type="date" id="custom-start-modal" class="form-control">
+                            <label for="custom-end-modal" class="form-label" style="margin-top: 0.5rem;">To:</label>
+                            <input type="date" id="custom-end-modal" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="export-pdf-modal" class="btn btn-primary">Print</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
             </div>
-            <button id="export-pdf-modal" class="modal-btn save-btn">Print</button>
-            <button id="cancel-export-modal" class="modal-btn cancel-btn">Cancel</button>
         </div>
     </div>
 
