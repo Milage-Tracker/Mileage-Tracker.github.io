@@ -515,22 +515,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add Trip Modal logic
     const showAddTripBtn = document.getElementById('show-add-trip');
-    const addTripModal = document.getElementById('add-trip-modal');
+    const addTripModal = new bootstrap.Modal(document.getElementById('addTripModal'));
     const addTripForm = document.getElementById('add-trip-form');
     const cancelAddTripBtn = document.getElementById('cancel-add-trip');
 
     function openAddTripModal() {
-        if (addTripModal) addTripModal.style.display = 'flex';
+        if (addTripModal) addTripModal.show();
     }
     function closeAddTripModal() {
-        if (addTripModal) addTripModal.style.display = 'none';
+        if (addTripModal) addTripModal.hide();
         if (addTripForm) addTripForm.reset();
     }
-    if (showAddTripBtn) showAddTripBtn.addEventListener('click', openAddTripModal);
     if (cancelAddTripBtn) cancelAddTripBtn.addEventListener('click', closeAddTripModal);
-    if (addTripModal) {
-        addTripModal.addEventListener('click', (e) => {
-            if (e.target === addTripModal) closeAddTripModal();
+    const addTripModalElement = document.getElementById('addTripModal');
+    if (addTripModalElement) {
+        addTripModalElement.addEventListener('click', (e) => {
+            if (e.target === addTripModalElement) closeAddTripModal();
         });
     }
     if (addTripForm) {

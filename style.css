@@ -955,64 +955,6 @@ h2 {
     text-align: center;
 }
 
-#add-trip-form label {
-    display: block;
-    margin-bottom: 4px;
-    color: #2980b9;
-    font-weight: 500;
-    font-size: 1em;
-}
-
-#add-trip-form input[type="text"],
-#add-trip-form input[type="date"],
-#add-trip-form input[type="number"] {
-    width: 100%;
-    padding: 7px 10px;
-    margin-bottom: 14px;
-    border: 1px solid #b2bec3;
-    border-radius: 4px;
-    font-size: 1em;
-    background: #f4f8fb;
-    box-sizing: border-box;
-}
-
-#add-trip-form button[type="submit"] {
-    background: #2980b9;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 18px;
-    font-size: 1em;
-    margin-top: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
-    width: 100%;
-    margin-bottom: 8px;
-}
-
-#add-trip-form button[type="submit"]:hover {
-    background: #21618c;
-}
-
-#add-trip-form button.cancel-btn {
-    background: #b2bec3;
-    color: #222;
-    margin-left: 0;
-    width: 100%;
-}
-
-#add-trip-form button.cancel-btn:hover {
-    background: #c0392b;
-    color: #fff;
-}
-
-@media (max-width: 600px) {
-    #add-trip-modal .modal-content {
-        padding: 12px 2vw 8px 2vw;
-        max-width: 99vw;
-    }
-}
-
 /* Export Modal and Button */
 .main-export-btn {
     display: block;
