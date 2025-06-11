@@ -89,7 +89,7 @@
                         <div class="mb-3">
                             <label for="distance" class="form-label">Distance (miles): <span class="required">*</span>
                             </label>
-                            <input type="number" class="form-control" id="distance" required>
+                            <input type="number" class="form-control" id="distance" required step="0.01" min="0">
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary">Add Trip</button>
@@ -151,8 +151,8 @@
             <label>Start Location: <input type="text" id="edit-start-location"></label><br><br>
             <label>End Location: <input type="text" id="edit-end-location"></label><br><br>
             <label>Purpose: <input type="text" id="edit-purpose"></label><br><br>
-            <label>Distance (miles): <span class="required">*</span> <input type="number"
-                    id="edit-distance"></label><br><br>
+            <label>Distance (miles): <span class="required">*</span> <input type="number" id="edit-distance" step="0.01"
+                    min="0"></label><br><br>
             <button id="save-edit" class="modal-btn save-btn">Save</button>
             <button id="cancel-edit" class="modal-btn cancel-btn">Cancel</button>
         </div>

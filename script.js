@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <input type="text" id="inline-edit-start-location" value="${trip.startLocation || ''}" placeholder="Start Location" />
                 <input type="text" id="inline-edit-end-location" value="${trip.endLocation || ''}" placeholder="End Location" />
                 <input type="text" id="inline-edit-purpose" value="${trip.purpose || ''}" placeholder="Purpose" />
-                <input type="number" id="inline-edit-distance" value="${trip.distance}" required placeholder="Distance (miles)" />
+                <input type="number" id="inline-edit-distance" value="${trip.distance}" required placeholder="Distance (miles)" step="0.01" min="0" />
             </div>
             <div class="inline-edit-actions">
                 <button type="submit">Save</button>
@@ -742,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.setFont(undefined, 'bold');
                 const headers = ['Date', 'Distance', 'From', 'To', 'Purpose'];
                 let x = 60;
-                let colWidths = [70, 60, 100, 100, 140];
+                let colWidths = [90, 80, 90, 90, 120]; // Increase Date and Distance columns
                 let headerHeight = 18;
                 doc.rect(x - 2, y - headerHeight + 4, colWidths.reduce((a, b) => a + b, 0) + 8, headerHeight, 'F');
                 headers.forEach((h, i) => {
@@ -770,11 +770,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     doc.setTextColor('#222');
                     row.forEach((cell, i) => {
-                        if (i === 1) {
-                            doc.text(String(cell), x + 4 + colWidths[i] - doc.getTextWidth(String(cell)) - 8, y, { align: 'right' });
-                        } else {
-                            doc.text(String(cell), x + 4, y);
+                        let cellText = String(cell);
+                        let maxCellWidth = colWidths[i] - 8;
+                        // Always truncate with ellipsis if too long
+                        if (doc.getTextWidth(cellText) > maxCellWidth) {
+                            while (doc.getTextWidth(cellText + '...') > maxCellWidth && cellText.length > 0) {
+                                cellText = cellText.slice(0, -1);
+                            }
+                            cellText += '...';
                         }
+                        // Center align all columns
+                        const cellX = x + 4 + (colWidths[i] - doc.getTextWidth(cellText)) / 2 - 4;
+                        doc.text(cellText, cellX, y, { align: 'left' });
                         x += colWidths[i];
                     });
                     y += 16;
@@ -975,7 +982,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     doc.setFont(undefined, 'bold');
                     const headers = ['Date', 'Distance', 'From', 'To', 'Purpose'];
                     let x = 60;
-                    let colWidths = [70, 60, 100, 100, 140];
+                    let colWidths = [90, 80, 90, 90, 120]; // Increase Date and Distance columns
                     let headerHeight = 18;
                     doc.rect(x - 2, y - headerHeight + 4, colWidths.reduce((a, b) => a + b, 0) + 8, headerHeight, 'F');
                     headers.forEach((h, i) => {
@@ -1003,11 +1010,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         doc.setTextColor('#222');
                         row.forEach((cell, i) => {
-                            if (i === 1) {
-                                doc.text(String(cell), x + 4 + colWidths[i] - doc.getTextWidth(String(cell)) - 8, y, { align: 'right' });
-                            } else {
-                                doc.text(String(cell), x + 4, y);
+                            let cellText = String(cell);
+                            let maxCellWidth = colWidths[i] - 8;
+                            // Always truncate with ellipsis if too long
+                            if (doc.getTextWidth(cellText) > maxCellWidth) {
+                                while (doc.getTextWidth(cellText + '...') > maxCellWidth && cellText.length > 0) {
+                                    cellText = cellText.slice(0, -1);
+                                }
+                                cellText += '...';
                             }
+                            // Center align all columns
+                            const cellX = x + 4 + (colWidths[i] - doc.getTextWidth(cellText)) / 2 - 4;
+                            doc.text(cellText, cellX, y, { align: 'left' });
                             x += colWidths[i];
                         });
                         y += 16;
