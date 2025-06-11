@@ -763,28 +763,48 @@ document.addEventListener('DOMContentLoaded', () => {
                         trip.purpose || ''
                     ];
                     monthTotal += parseFloat(trip.distance) || 0;
-                    // Alternate row color
-                    if (idx % 2 === 0) {
-                        doc.setFillColor(234, 243, 250); // #eaf3fa
-                        doc.rect(x - 2, y - 12, colWidths.reduce((a, b) => a + b, 0) + 8, 16, 'F');
-                    }
-                    doc.setTextColor('#222');
+                    // Calculate wrapped lines for each cell and max lines for the row
+                    let cellLinesArr = [];
+                    let maxLines = 1;
                     row.forEach((cell, i) => {
                         let cellText = String(cell);
                         let maxCellWidth = colWidths[i] - 8;
-                        // Always truncate with ellipsis if too long
-                        if (doc.getTextWidth(cellText) > maxCellWidth) {
-                            while (doc.getTextWidth(cellText + '...') > maxCellWidth && cellText.length > 0) {
-                                cellText = cellText.slice(0, -1);
+                        let lines = [];
+                        let remaining = cellText;
+                        while (remaining.length > 0) {
+                            let fit = remaining.length;
+                            while (fit > 0 && doc.getTextWidth(remaining.slice(0, fit)) > maxCellWidth) {
+                                fit--;
                             }
-                            cellText += '...';
+                            if (fit === 0) fit = 1;
+                            lines.push(remaining.slice(0, fit));
+                            remaining = remaining.slice(fit);
                         }
-                        // Center align all columns
-                        const cellX = x + 4 + (colWidths[i] - doc.getTextWidth(cellText)) / 2 - 4;
-                        doc.text(cellText, cellX, y, { align: 'left' });
-                        x += colWidths[i];
+                        cellLinesArr.push(lines);
+                        if (lines.length > maxLines) maxLines = lines.length;
                     });
-                    y += 16;
+                    let rowHeight = maxLines * 14 + 8; // Increase line height and add extra vertical padding
+                    // Alternate row color, draw after maxLines is known
+                    if (idx % 2 === 0) {
+                        doc.setFillColor(234, 243, 250); // #eaf3fa
+                        doc.rect(x - 2, y - 12, colWidths.reduce((a, b) => a + b, 0) + 8, rowHeight + 8, 'F');
+                    }
+                    doc.setTextColor('#222');
+                    let cellX = x;
+                    row.forEach((cell, i) => {
+                        let lines = cellLinesArr[i];
+                        // Center vertically in the row
+                        let totalTextHeight = lines.length * 14;
+                        let startY = y + ((rowHeight - totalTextHeight) / 2) + 2;
+                        let lineY = startY;
+                        lines.forEach(line => {
+                            const textX = cellX + 10 + (colWidths[i] - 20 - doc.getTextWidth(line)) / 2;
+                            doc.text(line, textX, lineY, { align: 'left' });
+                            lineY += 14;
+                        });
+                        cellX += colWidths[i];
+                    });
+                    y += rowHeight + 2; // Add extra space between rows
                     if (y > 780) {
                         addFooter();
                         doc.addPage();
@@ -797,11 +817,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Summary row for month
                 doc.setFont(undefined, 'bold');
                 doc.setTextColor('#21618c');
-                doc.text('Total Miles:', 60, y);
-                doc.text(monthTotal.toFixed(2) + ' mi', 134 + 60, y, { align: 'right' });
+                doc.text('Total Miles:', 60, y + 8); // Add vertical space before total
+                doc.text(monthTotal.toFixed(2) + ' mi', 134 + 60, y + 8, { align: 'right' });
                 doc.setFont(undefined, 'normal');
                 doc.setTextColor('#222');
-                y += 18;
+                y += 26; // Add more space after total row
                 if (y > 780) {
                     addFooter();
                     doc.addPage();
@@ -1003,28 +1023,48 @@ document.addEventListener('DOMContentLoaded', () => {
                             trip.purpose || ''
                         ];
                         monthTotal += parseFloat(trip.distance) || 0;
-                        // Alternate row color
-                        if (idx % 2 === 0) {
-                            doc.setFillColor(234, 243, 250); // #eaf3fa
-                            doc.rect(x - 2, y - 12, colWidths.reduce((a, b) => a + b, 0) + 8, 16, 'F');
-                        }
-                        doc.setTextColor('#222');
+                        // Calculate wrapped lines for each cell and max lines for the row
+                        let cellLinesArr = [];
+                        let maxLines = 1;
                         row.forEach((cell, i) => {
                             let cellText = String(cell);
                             let maxCellWidth = colWidths[i] - 8;
-                            // Always truncate with ellipsis if too long
-                            if (doc.getTextWidth(cellText) > maxCellWidth) {
-                                while (doc.getTextWidth(cellText + '...') > maxCellWidth && cellText.length > 0) {
-                                    cellText = cellText.slice(0, -1);
+                            let lines = [];
+                            let remaining = cellText;
+                            while (remaining.length > 0) {
+                                let fit = remaining.length;
+                                while (fit > 0 && doc.getTextWidth(remaining.slice(0, fit)) > maxCellWidth) {
+                                    fit--;
                                 }
-                                cellText += '...';
+                                if (fit === 0) fit = 1;
+                                lines.push(remaining.slice(0, fit));
+                                remaining = remaining.slice(fit);
                             }
-                            // Center align all columns
-                            const cellX = x + 4 + (colWidths[i] - doc.getTextWidth(cellText)) / 2 - 4;
-                            doc.text(cellText, cellX, y, { align: 'left' });
-                            x += colWidths[i];
+                            cellLinesArr.push(lines);
+                            if (lines.length > maxLines) maxLines = lines.length;
                         });
-                        y += 16;
+                        let rowHeight = maxLines * 14 + 8; // Increase line height and add extra vertical padding
+                        // Alternate row color, draw after maxLines is known
+                        if (idx % 2 === 0) {
+                            doc.setFillColor(234, 243, 250); // #eaf3fa
+                            doc.rect(x - 2, y - 12, colWidths.reduce((a, b) => a + b, 0) + 8, rowHeight + 8, 'F');
+                        }
+                        doc.setTextColor('#222');
+                        let cellX = x;
+                        row.forEach((cell, i) => {
+                            let lines = cellLinesArr[i];
+                            // Center vertically in the row
+                            let totalTextHeight = lines.length * 14;
+                            let startY = y + ((rowHeight - totalTextHeight) / 2) + 2;
+                            let lineY = startY;
+                            lines.forEach(line => {
+                                const textX = cellX + 10 + (colWidths[i] - 20 - doc.getTextWidth(line)) / 2;
+                                doc.text(line, textX, lineY, { align: 'left' });
+                                lineY += 14;
+                            });
+                            cellX += colWidths[i];
+                        });
+                        y += rowHeight + 2; // Add extra space between rows
                         if (y > 780) {
                             addFooter();
                             doc.addPage();
@@ -1037,11 +1077,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Summary row for month
                     doc.setFont(undefined, 'bold');
                     doc.setTextColor('#21618c');
-                    doc.text('Total Miles:', 60, y);
-                    doc.text(monthTotal.toFixed(2) + ' mi', 134 + 60, y, { align: 'right' });
+                    doc.text('Total Miles:', 60, y + 8); // Add vertical space before total
+                    doc.text(monthTotal.toFixed(2) + ' mi', 134 + 60, y + 8, { align: 'right' });
                     doc.setFont(undefined, 'normal');
                     doc.setTextColor('#222');
-                    y += 18;
+                    y += 26; // Add more space after total row
                     if (y > 780) {
                         addFooter();
                         doc.addPage();
