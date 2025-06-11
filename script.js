@@ -710,10 +710,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Build PDF content with styled tables
         const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
         let y = 40;
+        let page = 1;
+        const addFooter = () => {
+            const pageHeight = doc.internal.pageSize.height || 792; // fallback for letter size
+            doc.setFontSize(9);
+            doc.setTextColor('#888');
+            const dateStr = 'Exported: ' + new Date().toLocaleString();
+            doc.text(dateStr, 40, pageHeight - 20);
+            doc.text('Page ' + page, 520, pageHeight - 20);
+        };
         doc.setFontSize(20);
         doc.setTextColor('#21618c');
         doc.text(getExportHeading(rangeType, range), 40, y);
-        y += 50; // Increased from 30 to 50 for more space below heading
+        y += 50;
         Object.keys(grouped).sort((a, b) => b - a).forEach(year => {
             doc.setFontSize(16);
             doc.setTextColor('#2980b9');
@@ -726,10 +735,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.setTextColor('#2980b9');
                 doc.text('  ' + monthName, 50, y);
                 y += 18;
-                // Table headers with blue background
+                // Table headers with blue background, bold
                 doc.setFontSize(11);
                 doc.setTextColor('#fff');
                 doc.setFillColor(41, 128, 185); // #2980b9
+                doc.setFont(undefined, 'bold');
                 const headers = ['Date', 'Distance', 'From', 'To', 'Purpose'];
                 let x = 60;
                 let colWidths = [70, 60, 100, 100, 140];
@@ -739,8 +749,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     doc.text(h, x + 4, y);
                     x += colWidths[i];
                 });
+                doc.setFont(undefined, 'normal');
                 y += headerHeight;
                 // Table rows with alternating background
+                let monthTotal = 0;
                 grouped[year][month].forEach((trip, idx) => {
                     x = 60;
                     const row = [
@@ -750,6 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         trip.endLocation || '',
                         trip.purpose || ''
                     ];
+                    monthTotal += parseFloat(trip.distance) || 0;
                     // Alternate row color
                     if (idx % 2 === 0) {
                         doc.setFillColor(234, 243, 250); // #eaf3fa
@@ -757,19 +770,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     doc.setTextColor('#222');
                     row.forEach((cell, i) => {
-                        doc.text(String(cell), x + 4, y);
+                        if (i === 1) {
+                            doc.text(String(cell), x + 4 + colWidths[i] - doc.getTextWidth(String(cell)) - 8, y, { align: 'right' });
+                        } else {
+                            doc.text(String(cell), x + 4, y);
+                        }
                         x += colWidths[i];
                     });
                     y += 16;
                     if (y > 780) {
+                        addFooter();
                         doc.addPage();
+                        page++;
                         y = 40;
+                        doc.setFontSize(14);
+                        doc.setTextColor('#2980b9');
                     }
                 });
+                // Summary row for month
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor('#21618c');
+                doc.text('Total Miles:', 60, y);
+                doc.text(monthTotal.toFixed(2) + ' mi', 134 + 60, y, { align: 'right' });
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor('#222');
+                y += 18;
+                if (y > 780) {
+                    addFooter();
+                    doc.addPage();
+                    page++;
+                    y = 40;
+                }
                 y += 10;
             });
             y += 8;
         });
+        addFooter();
         doc.save(getPrintFilename(rangeType, range) + '.pdf');
     }
 
@@ -907,6 +943,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Build PDF content with styled tables
             const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
             let y = 40;
+            let page = 1;
+            const addFooter = () => {
+                const pageHeight = doc.internal.pageSize.height || 792; // fallback for letter size
+                doc.setFontSize(9);
+                doc.setTextColor('#888');
+                const dateStr = 'Exported: ' + new Date().toLocaleString();
+                doc.text(dateStr, 40, pageHeight - 20);
+                doc.text('Page ' + page, 520, pageHeight - 20);
+            };
             doc.setFontSize(20);
             doc.setTextColor('#21618c');
             doc.text(getExportHeadingModal(rangeType, range), 40, y);
@@ -923,10 +968,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     doc.setTextColor('#2980b9');
                     doc.text('  ' + monthName, 50, y);
                     y += 18;
-                    // Table headers with blue background
+                    // Table headers with blue background, bold
                     doc.setFontSize(11);
                     doc.setTextColor('#fff');
                     doc.setFillColor(41, 128, 185); // #2980b9
+                    doc.setFont(undefined, 'bold');
                     const headers = ['Date', 'Distance', 'From', 'To', 'Purpose'];
                     let x = 60;
                     let colWidths = [70, 60, 100, 100, 140];
@@ -936,8 +982,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         doc.text(h, x + 4, y);
                         x += colWidths[i];
                     });
+                    doc.setFont(undefined, 'normal');
                     y += headerHeight;
                     // Table rows with alternating background
+                    let monthTotal = 0;
                     grouped[year][month].forEach((trip, idx) => {
                         x = 60;
                         const row = [
@@ -947,6 +995,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             trip.endLocation || '',
                             trip.purpose || ''
                         ];
+                        monthTotal += parseFloat(trip.distance) || 0;
                         // Alternate row color
                         if (idx % 2 === 0) {
                             doc.setFillColor(234, 243, 250); // #eaf3fa
@@ -954,19 +1003,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         doc.setTextColor('#222');
                         row.forEach((cell, i) => {
-                            doc.text(String(cell), x + 4, y);
+                            if (i === 1) {
+                                doc.text(String(cell), x + 4 + colWidths[i] - doc.getTextWidth(String(cell)) - 8, y, { align: 'right' });
+                            } else {
+                                doc.text(String(cell), x + 4, y);
+                            }
                             x += colWidths[i];
                         });
                         y += 16;
                         if (y > 780) {
+                            addFooter();
                             doc.addPage();
+                            page++;
                             y = 40;
+                            doc.setFontSize(14);
+                            doc.setTextColor('#2980b9');
                         }
                     });
+                    // Summary row for month
+                    doc.setFont(undefined, 'bold');
+                    doc.setTextColor('#21618c');
+                    doc.text('Total Miles:', 60, y);
+                    doc.text(monthTotal.toFixed(2) + ' mi', 134 + 60, y, { align: 'right' });
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor('#222');
+                    y += 18;
+                    if (y > 780) {
+                        addFooter();
+                        doc.addPage();
+                        page++;
+                        y = 40;
+                    }
                     y += 10;
                 });
                 y += 8;
             });
+            addFooter();
             doc.save(getPrintFilename(rangeType, range) + '.pdf');
             closeExportModal();
         });
